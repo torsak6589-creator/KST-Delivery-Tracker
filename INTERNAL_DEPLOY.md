@@ -12,6 +12,9 @@
 
 ---
 
+> **ฐานข้อมูลกลาง (สำคัญ):** รันเครื่องเดียวเป็นเซิร์ฟเวอร์ ทุกคนในวง LAN เข้ามาที่เครื่องนี้
+> ใช้ฐานข้อมูลก้อนเดียวกัน (เก็บใน Docker volume `kst-data`) — ใครนำเข้า/แก้ไข ทุกคนเห็นตรงกันทันที
+
 ## วิธีที่ 1 — Docker (แนะนำ)
 
 ### เตรียมเครื่อง
@@ -23,7 +26,13 @@
 ```bash
 git clone https://github.com/torsak6589-creator/KST-Delivery-Tracker.git
 cd KST-Delivery-Tracker
-git checkout claude/eager-mccarthy-v9yd7h
+```
+จากนั้น **กดรันทีเดียว**:
+- **Windows:** ดับเบิลคลิก `start-windows.bat` (จะ build + เริ่มระบบ + บอก URL ให้เสร็จ)
+- **Linux/Mac:** `./start.sh`
+
+หรือสั่งเองตรงๆ:
+```bash
 docker compose up -d --build
 ```
 รอ build เสร็จ (~3-5 นาทีครั้งแรก) — ระบบจะสร้างฐานข้อมูลและใส่ข้อมูล 263 แถวให้อัตโนมัติ
