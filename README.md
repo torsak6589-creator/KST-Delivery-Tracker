@@ -38,15 +38,16 @@ npm install
 ```
 
 ### 2) ตั้งค่าฐานข้อมูล
-คัดลอก `.env.example` เป็น `.env` แล้วแก้ `DATABASE_URL` ให้ชี้ฐานข้อมูลบริษัท
+คัดลอก `.env.example` เป็น `.env`
 ```bash
 cp .env.example .env
 ```
-ตัวอย่าง SQL Server:
+ค่าเริ่มต้นเป็น **SQLite** (`DATABASE_URL="file:./dev.db"`) — ใช้งานได้ทันทีไม่ต้องตั้งค่าอะไรเพิ่ม เหมาะกับ dev / สาธิต
+
+**สำหรับ production** ที่ต้องการต่อฐานข้อมูลบริษัท ให้แก้ `provider` ใน `prisma/schema.prisma` เป็น `sqlserver` / `mysql` / `postgresql` แล้วตั้ง `DATABASE_URL` ให้ตรงกัน เช่น SQL Server:
 ```
 DATABASE_URL="sqlserver://10.0.0.5:1433;database=KST_TRACKER;user=kst;password=secret;encrypt=true;trustServerCertificate=true"
 ```
-> ถ้าบริษัทใช้ **MySQL** หรือ **PostgreSQL** ให้แก้ `provider` ใน `prisma/schema.prisma` (มีคอมเมนต์บอกไว้) แล้วใช้ URL รูปแบบที่ตรงกัน
 
 ### 3) สร้างตารางและใส่ข้อมูลเริ่มต้น
 ```bash

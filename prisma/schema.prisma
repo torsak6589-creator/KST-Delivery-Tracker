@@ -1,7 +1,9 @@
 // KST Delivery Tracker — data model
-// Default provider: sqlserver (company SAP B1 / MSSQL). To switch:
-//   MySQL    -> provider = "mysql"
-//   Postgres -> provider = "postgresql"
+// Default provider: sqlite (zero-config, runs immediately for local/dev/demo).
+// For production switch provider to one of:
+//   SQL Server -> provider = "sqlserver"   (company SAP B1 / MSSQL)
+//   MySQL      -> provider = "mysql"
+//   Postgres   -> provider = "postgresql"
 // then update DATABASE_URL in .env and run: npm run prisma:push
 
 generator client {
@@ -9,7 +11,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlserver"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -46,7 +48,9 @@ model PurchaseOrder {
 
   importedAt    DateTime  @default(now())
 
-  @@unique([poNo, lineItem], name: "poNo_lineItem")
+  // A PO line can legitimately recur (partial receipts / multiple GRPO rows),
+  // so this is a lookup index, not a unique key. `id` is the real primary key.
+  @@index([poNo, lineItem])
   @@index([status])
   @@index([dueDate])
   @@index([vendorName])
