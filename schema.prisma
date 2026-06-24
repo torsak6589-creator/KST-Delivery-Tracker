@@ -1,0 +1,60 @@
+// KST Delivery Tracker — data model
+// Default provider: sqlserver (company SAP B1 / MSSQL). To switch:
+//   MySQL    -> provider = "mysql"
+//   Postgres -> provider = "postgresql"
+// then update DATABASE_URL in .env and run: npm run prisma:push
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+/// One purchase-order line item (the unit the tracker operates on).
+model PurchaseOrder {
+  id            Int       @id @default(autoincrement())
+  poNo          String
+  lineItem      Int?
+  poDate        DateTime?
+  poStatus      String?
+  dueDate       DateTime?
+  // status/days are derived on read, but cached here for fast filtering/sorting.
+  days          Int?
+  status        String?   // ov | du | ne | ok | dn | ca
+  vendorCode    String?
+  vendorName    String?
+  department    String?
+  requester     String?
+  itemCode      String?
+  itemName      String?
+  qty           Float?
+  unit          String?
+  unitPrice     Float?
+  amount        Float?
+  pendingQty    Float?
+  grpoStatus    String?
+  receiveDate   DateTime?
+  grpoNo        String?
+  receiveQty    Float?
+  receiveAmount Float?
+  createdBy     String?
+  prNo          String?
+  approveAVL    String?
+
+  importedAt    DateTime  @default(now())
+
+  @@unique([poNo, lineItem], name: "poNo_lineItem")
+  @@index([status])
+  @@index([dueDate])
+  @@index([vendorName])
+  @@index([department])
+}
+
+/// Snapshot reference date used to compute "days remaining" / status.
+model AppMeta {
+  id    Int    @id @default(1)
+  today String // YYYY-MM-DD
+}
