@@ -8,6 +8,9 @@
 
 generator client {
   provider = "prisma-client-js"
+  // "native" for local dev; "debian-openssl-3.0.x" is the Azure App Service
+  // (Linux/Node) runtime — needed so the query engine exists after deploy.
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
