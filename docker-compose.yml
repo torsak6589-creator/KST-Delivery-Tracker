@@ -1,0 +1,22 @@
+# รันแอปบนเครื่อง/เซิร์ฟเวอร์ในบริษัท ให้ทุกคนในวง LAN เข้าใช้ได้
+#   docker compose up -d --build
+# จากนั้นเปิด http://<IP-ของเครื่องนี้>:3000
+services:
+  app:
+    build: .
+    container_name: kst-delivery-tracker
+    restart: unless-stopped
+    ports:
+      - "3000:3000"            # เปลี่ยนเลขซ้ายได้ถ้าพอร์ต 3000 ชนกับอย่างอื่น เช่น "8080:3000"
+    environment:
+      # ── ค่าเริ่มต้น: SQLite เก็บไฟล์ใน volume (ข้อมูลไม่หายเมื่อ restart) ──
+      DATABASE_URL: "file:/data/dev.db"
+      NEXT_PUBLIC_SNAPSHOT_DATE: "2026-06-24"
+      # ── ใช้ SQL Server บริษัทแทน: เปลี่ยน provider เป็น "sqlserver" ใน
+      #    prisma/schema.prisma แล้วใช้บรรทัดนี้ (ลบ volumes ด้านล่างได้) ──
+      # DATABASE_URL: "sqlserver://10.0.0.5:1433;database=KST_TRACKER;user=USER;password=PASS;encrypt=true;trustServerCertificate=true"
+    volumes:
+      - kst-data:/data
+
+volumes:
+  kst-data:

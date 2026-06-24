@@ -1,0 +1,44 @@
+name: Deploy to Azure App Service
+
+# Deploys the Next.js app to Azure App Service (Linux/Node).
+# Azure's Oryx build runs `npm install` + `npm run build` (prisma generate +
+# next build) on its own runtime, so the Prisma engine matches automatically.
+#
+# One-time setup (see AZURE_DEPLOY.md):
+#   1. Create the App Service (Linux, Node 20 LTS).
+#   2. App Service → Deployment Center → Manage publish profile → Download.
+#   3. GitHub repo → Settings → Secrets → Actions → new secret
+#      AZURE_WEBAPP_PUBLISH_PROFILE = (paste the downloaded file contents).
+#   4. Set AZURE_WEBAPP_NAME below to your App Service name.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: kst-delivery-tracker   # ← change to your App Service name
+  NODE_VERSION: '20.x'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Build here too, so the deploy fails fast on a broken build.
+      - name: Install & build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: .
