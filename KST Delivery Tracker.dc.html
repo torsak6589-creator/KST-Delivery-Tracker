@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="#5B5BF5"/><g transform="translate(30 30)"><rect width="40" height="40" rx="9" fill="#fff"/><text x="20" y="26" font-family="sans-serif" font-size="14" font-weight="700" fill="#5B5BF5" text-anchor="middle">KST</text></g></svg></template>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Sora:wght@500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#F3F4FA}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#D4D7E4;border-radius:8px;border:2px solid #F3F4FA}
+  ::-webkit-scrollbar-thumb:hover{background:#BFC3D6}
+  @keyframes kstpulse{0%,100%{opacity:1}50%{opacity:.55}}
+</style>
+<script src="kst-data.js"></script>
+</helmet>
+<div style="display:flex;height:100vh;width:100%;overflow:hidden;font-family:'Noto Sans Thai',sans-serif;color:#171A2B;background:#F3F4FA;font-size:13px">
+
+  <aside style="width:248px;min-width:248px;background:#FFFFFF;border-right:1px solid #ECEDF4;display:flex;flex-direction:column;padding:20px 16px">
+    <div style="display:flex;align-items:center;gap:11px;padding:4px 8px 22px">
+      <div style="width:38px;height:38px;border-radius:11px;background:{{ accent }};display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:700;font-size:15px;color:#fff;box-shadow:0 6px 16px {{ accentGlow }}">KST</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;letter-spacing:-.2px">Delivery Tracker</div>
+        <div style="font-size:11px;color:#9AA0B4">ฝ่ายจัดซื้อ · ห้องเย็นโชติวัฒน์</div>
+      </div>
+    </div>
+
+    <div style="font-size:10px;font-weight:700;color:#B0B5C6;letter-spacing:.7px;text-transform:uppercase;padding:0 10px 8px">เมนู</div>
+    <div onClick="{{ goDash }}" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:11px;cursor:pointer;font-size:13.5px;font-weight:600;margin-bottom:4px;color:{{ dashFg }};background:{{ dashBg }};transition:all .14s">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+      ภาพรวม
+    </div>
+    <div onClick="{{ goPos }}" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:11px;cursor:pointer;font-size:13.5px;font-weight:600;margin-bottom:4px;color:{{ posFg }};background:{{ posBg }};transition:all .14s">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.5" y2="6"/><line x1="3" y1="12" x2="3.5" y2="12"/><line x1="3" y1="18" x2="3.5" y2="18"/></svg>
+      รายการ PO
+      <span style="margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;background:{{ posCountBg }};color:{{ posCountFg }};padding:1px 8px;border-radius:20px">{{ openCountTxt }}</span>
+    </div>
+    <div onClick="{{ goSup }}" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:11px;cursor:pointer;font-size:13.5px;font-weight:600;color:{{ supFg }};background:{{ supBg }};transition:all .14s">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h13v10H3z"/><path d="M16 10h3.5L22 13v4h-6"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg>
+      Supplier
+    </div>
+
+    <div style="margin-top:auto;padding:14px;border-radius:13px;background:#F6F7FC;border:1px solid #EDEEF6">
+      <div style="font-size:10px;color:#9AA0B4;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">ข้อมูล ณ วันที่</div>
+      <div style="font-size:13px;font-weight:600;color:#3A4055">{{ todayFmt }}</div>
+      <div style="font-size:11px;color:#9AA0B4;margin-top:2px;font-family:'DM Mono',monospace">snapshot · 1 ม.ค.–24 มิ.ย. 69</div>
+    </div>
+  </aside>
+
+  <main style="flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column">
+
+    <!-- ░░ DASHBOARD ░░ -->
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+    <div style="padding:26px 32px 40px">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:22px">
+        <div>
+          <div style="font-size:24px;font-weight:700;font-family:'Sora','Noto Sans Thai',sans-serif;letter-spacing:-.5px">ภาพรวมการจัดส่ง</div>
+          <div style="font-size:13px;color:#6B7186;margin-top:3px">ติดตามสถานะการส่งของจาก Supplier ตามใบสั่งซื้อ (PO)</div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button onClick="{{ importClick }}" style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #E2E4EF;color:#3A4055;font-family:'Noto Sans Thai',sans-serif;font-size:13px;font-weight:600;padding:9px 15px;border-radius:10px;cursor:pointer" style-hover="border-color:#CBCFE0;box-shadow:0 2px 8px rgba(16,24,40,.06)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 20h16"/></svg>นำเข้า Excel
+          </button>
+          <button onClick="{{ exportClick }}" style="display:flex;align-items:center;gap:7px;background:{{ accent }};border:1px solid {{ accent }};color:#fff;font-family:'Noto Sans Thai',sans-serif;font-size:13px;font-weight:600;padding:9px 15px;border-radius:10px;cursor:pointer;box-shadow:0 4px 12px {{ accentGlow }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>ส่งออกรายงาน
+          </button>
+        </div>
+      </div>
+
+      <sc-if value="{{ hasOverdue }}" hint-placeholder-val="{{ true }}">
+      <div onClick="{{ goOverdue }}" style="display:flex;align-items:center;gap:16px;background:linear-gradient(100deg,#FFF1F2,#FFF6F1);border:1px solid #FBD9DC;border-radius:16px;padding:16px 20px;margin-bottom:20px;cursor:pointer" style-hover="box-shadow:0 8px 24px rgba(229,54,75,.10)">
+        <div style="width:46px;height:46px;min-width:46px;border-radius:13px;background:#FFE0E3;display:flex;align-items:center;justify-content:center;animation:kstpulse 2.4s ease-in-out infinite">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E5364B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.8 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:700;color:#B91C36">ของส่งเกินกำหนด {{ ovCount }} รายการ ต้องติดตามด่วน</div>
+          <div style="font-size:12.5px;color:#A65560;margin-top:2px">มูลค่ารวม {{ ovValue }} บาท ที่ยังไม่ได้รับของแม้เลยกำหนดส่งแล้ว — คลิกเพื่อดูทั้งหมด</div>
+        </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E5364B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+      </sc-if>
+
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:18px">
+        <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="6">
+          <div onClick="{{ k.onClick }}" style="background:{{ k.bg }};border:1px solid {{ k.bd }};border-radius:16px;padding:16px 16px 15px;cursor:pointer;box-shadow:0 1px 2px rgba(16,24,40,.04)" style-hover="transform:translateY(-2px);box-shadow:0 10px 24px rgba(16,24,40,.08)">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">
+              <span style="width:9px;height:9px;border-radius:50%;background:{{ k.dot }}"></span>
+              <span style="font-size:11px;font-weight:700;color:#5A6175;letter-spacing:.2px">{{ k.label }}</span>
+            </div>
+            <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:30px;line-height:1;color:{{ k.color }};letter-spacing:-1px">{{ k.value }}</div>
+            <div style="font-size:11px;color:#8A90A2;margin-top:7px;line-height:1.35">{{ k.sub }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.05fr 1.35fr;gap:18px;margin-bottom:18px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:18px;padding:22px;box-shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.03)">
+          <div style="font-size:15px;font-weight:700;margin-bottom:2px">สถานะของที่ยังค้างส่ง</div>
+          <div style="font-size:12px;color:#8A90A2;margin-bottom:18px">แบ่งตามความเร่งด่วนของกำหนดส่ง</div>
+          <div style="display:flex;align-items:center;gap:26px">
+            <div style="position:relative;width:148px;height:148px;min-width:148px;border-radius:50%;background:{{ donutGrad }}">
+              <div style="position:absolute;inset:20px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:30px;line-height:1;letter-spacing:-1px">{{ openTotalTxt }}</div>
+                <div style="font-size:11px;color:#8A90A2;margin-top:3px">รายการค้างส่ง</div>
+              </div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:11px">
+              <sc-for list="{{ donutSegs }}" as="s" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span style="width:11px;height:11px;border-radius:3px;background:{{ s.color }}"></span>
+                  <span style="font-size:13px;color:#3A4055;flex:1">{{ s.label }}</span>
+                  <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:#171A2B">{{ s.count }}</span>
+                  <span style="font-size:11px;color:#A0A6B6;width:38px;text-align:right">{{ s.pctTxt }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:18px;padding:22px;box-shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.03)">
+          <div style="font-size:15px;font-weight:700;margin-bottom:2px">กำหนดส่งที่กำลังจะถึง</div>
+          <div style="font-size:12px;color:#8A90A2;margin-bottom:20px">จำนวนรายการค้างส่ง แยกตามเดือนที่ครบกำหนด</div>
+          <div style="display:flex;align-items:flex-end;gap:14px;height:150px;padding:0 4px">
+            <sc-for list="{{ bars }}" as="b" hint-placeholder-count="6">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end">
+                <div style="font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:#3A4055">{{ b.count }}</div>
+                <div style="width:100%;max-width:42px;border-radius:8px 8px 4px 4px;background:{{ b.fill }};height:{{ b.hPct }}" title="{{ b.amount }} ฿"></div>
+                <div style="font-size:11px;color:#8A90A2;font-weight:600">{{ b.label }}</div>
+                <div style="font-size:9.5px;color:#B5BAC9;margin-top:-6px;font-family:'DM Mono',monospace">'{{ b.yr }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.35fr 1.05fr;gap:18px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:18px;padding:8px 8px 12px;box-shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.03)">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px">
+            <div>
+              <div style="font-size:15px;font-weight:700">ต้องติดตามด่วน</div>
+              <div style="font-size:12px;color:#8A90A2;margin-top:1px">รายการที่เกินกำหนดส่งมากที่สุด</div>
+            </div>
+            <button onClick="{{ goOverdue }}" style="font-family:'Noto Sans Thai',sans-serif;font-size:12.5px;font-weight:600;color:{{ accent }};background:transparent;border:none;cursor:pointer;display:flex;align-items:center;gap:4px">ดูทั้งหมด <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+          </div>
+          <sc-for list="{{ overdueList }}" as="r" hint-placeholder-count="6">
+            <div onClick="{{ r.onClick }}" style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:11px;cursor:pointer" style-hover="background:#FAFBFE">
+              <div style="width:42px;text-align:center">
+                <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:17px;color:#E5364B;line-height:1">{{ r.dayTxt }}</div>
+                <div style="font-size:9px;color:#C99;font-weight:600">วัน</div>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.itemName }}</div>
+                <div style="font-size:11.5px;color:#8A90A2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.vshort }} · <span style="font-family:'DM Mono',monospace">{{ r.poNo }}</span></div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-family:'DM Mono',monospace;font-size:12.5px;font-weight:500">{{ r.amountFmt }}</div>
+                <div style="font-size:11px;color:#A0A6B6">ครบ {{ r.dueFmt }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:18px;padding:22px;box-shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.03)">
+          <div style="font-size:15px;font-weight:700;margin-bottom:2px">Supplier ที่มีของค้างมากสุด</div>
+          <div style="font-size:12px;color:#8A90A2;margin-bottom:18px">เรียงตามมูลค่ารวมของรายการที่ค้างส่ง</div>
+          <div style="display:flex;flex-direction:column;gap:15px">
+            <sc-for list="{{ topSup }}" as="s" hint-placeholder-count="6">
+              <div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                  <span style="font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%">{{ s.name }}</span>
+                  <span style="font-family:'DM Mono',monospace;font-size:12px;color:#3A4055">{{ s.amount }}</span>
+                </div>
+                <div style="height:9px;border-radius:6px;background:#F1F2F8;overflow:hidden">
+                  <div style="height:100%;border-radius:6px;width:{{ s.w }};background:{{ s.fill }}"></div>
+                </div>
+                <div style="font-size:10.5px;color:#A0A6B6;margin-top:4px">ค้าง {{ s.open }} รายการ · เกินกำหนด {{ s.ov }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ░░ PO LIST ░░ -->
+    <sc-if value="{{ isPos }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;height:100%">
+      <div style="padding:24px 32px 0;background:#F3F4FA">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:18px">
+          <div>
+            <div style="font-size:22px;font-weight:700;font-family:'Sora','Noto Sans Thai',sans-serif;letter-spacing:-.4px">รายการใบสั่งซื้อ</div>
+            <div style="font-size:13px;color:#6B7186;margin-top:2px">{{ countText }}</div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button onClick="{{ importClick }}" style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #E2E4EF;color:#3A4055;font-family:'Noto Sans Thai',sans-serif;font-size:13px;font-weight:600;padding:9px 15px;border-radius:10px;cursor:pointer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 20h16"/></svg>นำเข้า
+            </button>
+            <button onClick="{{ exportClick }}" style="display:flex;align-items:center;gap:7px;background:{{ accent }};border:1px solid {{ accent }};color:#fff;font-family:'Noto Sans Thai',sans-serif;font-size:13px;font-weight:600;padding:9px 15px;border-radius:10px;cursor:pointer;box-shadow:0 4px 12px {{ accentGlow }}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>ส่งออก
+            </button>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+          <div style="position:relative;flex:1;min-width:240px;max-width:360px">
+            <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9AA0B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input value="{{ search }}" onInput="{{ onSearch }}" placeholder="ค้นหา Supplier / รายการ / PO No." style="width:100%;border:1px solid #E2E4EF;border-radius:10px;padding:10px 12px 10px 38px;font-family:'Noto Sans Thai',sans-serif;font-size:13px;color:#171A2B;outline:none;background:#fff" style-focus="border-color:{{ accent }};box-shadow:0 0 0 3px {{ accentGlow }}">
+          </div>
+          <select value="{{ dept }}" onChange="{{ onDept }}" style="border:1px solid #E2E4EF;border-radius:10px;padding:10px 12px;font-family:'Noto Sans Thai',sans-serif;font-size:13px;color:#3A4055;outline:none;background:#fff;cursor:pointer;min-width:160px">
+            <option value="">ทุกแผนก/ฝ่าย</option>
+            <sc-for list="{{ deptOpts }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+          </select>
+          <input type="date" value="{{ from }}" onChange="{{ onFrom }}" style="border:1px solid #E2E4EF;border-radius:10px;padding:9px 11px;font-family:'DM Mono',monospace;font-size:12px;color:#3A4055;outline:none;background:#fff;cursor:pointer">
+          <span style="color:#B5BAC9">–</span>
+          <input type="date" value="{{ to }}" onChange="{{ onTo }}" style="border:1px solid #E2E4EF;border-radius:10px;padding:9px 11px;font-family:'DM Mono',monospace;font-size:12px;color:#3A4055;outline:none;background:#fff;cursor:pointer">
+          <button onClick="{{ resetF }}" style="font-family:'Noto Sans Thai',sans-serif;font-size:12.5px;font-weight:600;color:#8A90A2;background:transparent;border:none;cursor:pointer;padding:8px 4px">ล้างตัวกรอง</button>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <sc-for list="{{ chips }}" as="c" hint-placeholder-count="6">
+            <div onClick="{{ c.onClick }}" style="display:flex;align-items:center;gap:7px;padding:7px 13px;border-radius:10px;cursor:pointer;font-size:12.5px;font-weight:600;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};transition:all .12s">
+              <span style="width:8px;height:8px;border-radius:50%;background:{{ c.dot }}"></span>{{ c.label }}
+              <span style="font-family:'DM Mono',monospace;font-weight:500;opacity:.85">{{ c.count }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="flex:1;overflow:auto;margin:14px 32px 0;background:#fff;border:1px solid #ECEDF4;border-radius:16px 16px 0 0;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+          <thead>
+            <tr style="background:#FAFBFD">
+              <th style="text-align:left;padding:13px 16px;font-weight:600;color:#6B7186;font-size:11.5px;white-space:nowrap;border-bottom:1px solid #ECEDF4;position:sticky;top:0;background:#FAFBFD;cursor:pointer" onClick="{{ sortPo }}">PO No. ↕</th>
+              <th style="text-align:left;padding:13px 12px;font-weight:600;color:#6B7186;font-size:11.5px;white-space:nowrap;border-bottom:1px solid #ECEDF4;position:sticky;top:0;background:#FAFBFD;cursor:pointer" onClick="{{ sortDue }}">กำหนดส่ง ↕</th>
+              <th style="text-align:center;padding:13px 8px;font-weight:600;color:#6B7186;font-size:11.5px;white-space:nowrap;border-bottom:1px solid #ECEDF4;position:sticky;top:0;background:#FAFBFD;cursor:pointer" onClick="{{ sortDays }}">วัน ↕</th>
+              <th style="text-align:left;padding:13px 12px;font-weight:600;color:#6B7186;font-size:11.5px;white-space:nowrap;border-bottom:1px solid #ECEDF4;position:sticky;top:0;background:#FAFBFD">สถานะ</th>
+              <th style="text-align:left;padding:13px 12px;font-weight:600;color:#6B7186;font-size:11.5px;white-space:nowrap;border-bottom:1px solid #ECEDF4;position:sticky;top:0;background:#FAFBFD;cursor:pointer" onClick="{{ sortSup }}">Supplier ↕</th>
+              <th style="text-align:left;padding:13px 12px;font-weight:600;color:#6B7186;font-size:11.5px;white-space:nowrap;border-bottom:1px solid #ECEDF4;position:sticky;top:0;background:#FAFBFD">รายการสินค้า</th>
+              <th style="text-align:right;padding:13px 12px;font-weight:600;color:#6B7186;font-size:11.5px;white-space:nowrap;border-bottom:1px solid #ECEDF4;position:sticky;top:0;background:#FAFBFD;cursor:pointer" onClick="{{ sortAmt }}">มูลค่า (฿) ↕</th>
+              <th style="text-align:center;padding:13px 12px;font-weight:600;color:#6B7186;font-size:11.5px;white-space:nowrap;border-bottom:1px solid #ECEDF4;position:sticky;top:0;background:#FAFBFD">รับ</th>
+              <th style="text-align:left;padding:13px 16px;font-weight:600;color:#6B7186;font-size:11.5px;white-space:nowrap;border-bottom:1px solid #ECEDF4;position:sticky;top:0;background:#FAFBFD">แผนก</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ pageRows }}" as="r" hint-placeholder-count="12">
+              <tr onClick="{{ r.onClick }}" style="border-bottom:1px solid #F2F3F8;cursor:pointer" style-hover="background:#FAFBFE">
+                <td style="padding:{{ rowPad }} 16px"><span style="font-family:'DM Mono',monospace;font-size:12px;font-weight:500">{{ r.poNo }}</span><div style="font-size:10px;color:#A0A6B6">Line {{ r.lineItem }}</div></td>
+                <td style="padding:{{ rowPad }} 12px;font-family:'DM Mono',monospace;font-size:12px;white-space:nowrap">{{ r.dueFmt }}</td>
+                <td style="padding:{{ rowPad }} 8px;text-align:center;font-family:'Sora',sans-serif;font-weight:700;font-size:13px;color:{{ r.dayColor }}">{{ r.dayTxt }}</td>
+                <td style="padding:{{ rowPad }} 12px"><span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;background:{{ r.bBg }};color:{{ r.bColor }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.bDot }}"></span>{{ r.badge }}</span></td>
+                <td style="padding:{{ rowPad }} 12px"><div style="font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ r.vendorName }}">{{ r.vshort }}</div><div style="font-size:10px;color:#A0A6B6;font-family:'DM Mono',monospace">{{ r.vendorCode }}</div></td>
+                <td style="padding:{{ rowPad }} 12px"><div style="max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ r.itemName }}">{{ r.itemName }}</div><div style="font-size:10px;color:#A0A6B6;font-family:'DM Mono',monospace">{{ r.itemCode }}</div></td>
+                <td style="padding:{{ rowPad }} 12px;text-align:right;font-family:'DM Mono',monospace;font-size:12px;font-weight:500">{{ r.amountFmt }}<div style="font-size:10px;color:#A0A6B6;font-weight:400">{{ r.qtyText }}</div></td>
+                <td style="padding:{{ rowPad }} 12px;text-align:center">
+                  <sc-if value="{{ r.received }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#EBF1FE;color:#3A6FF0">✓</span></sc-if>
+                  <sc-if value="{{ r.notReceived }}" hint-placeholder-val="{{ true }}"><span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#F4F5F9;color:#C2C7D6">–</span></sc-if>
+                </td>
+                <td style="padding:{{ rowPad }} 16px;font-size:11.5px;color:#5A6175;white-space:nowrap">{{ r.department }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:6px;padding:13px 32px;background:#fff;border-top:1px solid #ECEDF4;margin:0 32px;border-radius:0 0 16px 16px;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+        <button onClick="{{ prevClick }}" style="width:32px;height:32px;border-radius:9px;border:1px solid #E2E4EF;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#5A6175">‹</button>
+        <sc-for list="{{ pagItems }}" as="p" hint-placeholder-count="5">
+          <button onClick="{{ p.onClick }}" style="min-width:32px;height:32px;padding:0 8px;border-radius:9px;border:1px solid {{ p.bd }};background:{{ p.bg }};color:{{ p.fg }};cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;font-weight:500">{{ p.label }}</button>
+        </sc-for>
+        <button onClick="{{ nextClick }}" style="width:32px;height:32px;border-radius:9px;border:1px solid #E2E4EF;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#5A6175">›</button>
+        <span style="font-family:'DM Mono',monospace;font-size:11.5px;color:#A0A6B6;margin-left:10px">{{ pageInfo }}</span>
+      </div>
+      <div style="height:18px"></div>
+    </div>
+    </sc-if>
+
+    <!-- ░░ SUPPLIERS ░░ -->
+    <sc-if value="{{ isSuppliers }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:24px 32px 40px">
+
+      <sc-if value="{{ noSupplierSel }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <div style="margin-bottom:18px">
+          <div style="font-size:22px;font-weight:700;font-family:'Sora','Noto Sans Thai',sans-serif;letter-spacing:-.4px">Supplier</div>
+          <div style="font-size:13px;color:#6B7186;margin-top:2px">{{ supplierCountTxt }} · เรียงตามมูลค่าการสั่งซื้อรวม — คลิกเพื่อดูรายการทั้งหมด</div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.03)">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="background:#FAFBFD">
+              <th style="text-align:left;padding:13px 20px;font-weight:600;color:#6B7186;font-size:11.5px;border-bottom:1px solid #ECEDF4">Supplier</th>
+              <th style="text-align:right;padding:13px 14px;font-weight:600;color:#6B7186;font-size:11.5px;border-bottom:1px solid #ECEDF4">มูลค่ารวม (฿)</th>
+              <th style="text-align:center;padding:13px 14px;font-weight:600;color:#6B7186;font-size:11.5px;border-bottom:1px solid #ECEDF4">รายการ</th>
+              <th style="text-align:center;padding:13px 14px;font-weight:600;color:#6B7186;font-size:11.5px;border-bottom:1px solid #ECEDF4">ค้างส่ง</th>
+              <th style="text-align:center;padding:13px 14px;font-weight:600;color:#6B7186;font-size:11.5px;border-bottom:1px solid #ECEDF4">เกินกำหนด</th>
+              <th style="text-align:left;padding:13px 20px;font-weight:600;color:#6B7186;font-size:11.5px;border-bottom:1px solid #ECEDF4;width:170px">อัตรารับของครบ</th>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{ supplierRows }}" as="s" hint-placeholder-count="12">
+                <tr onClick="{{ s.onClick }}" style="border-bottom:1px solid #F2F3F8;cursor:pointer" style-hover="background:#FAFBFE">
+                  <td style="padding:12px 20px"><div style="font-weight:600;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ s.full }}">{{ s.name }}</div><div style="font-size:10.5px;color:#A0A6B6;font-family:'DM Mono',monospace">{{ s.code }}</div></td>
+                  <td style="padding:12px 14px;text-align:right;font-family:'DM Mono',monospace;font-size:12.5px;font-weight:500">{{ s.amount }}</td>
+                  <td style="padding:12px 14px;text-align:center;font-family:'DM Mono',monospace;color:#5A6175">{{ s.lines }}</td>
+                  <td style="padding:12px 14px;text-align:center"><span style="font-family:'DM Mono',monospace;font-weight:500;color:{{ s.openColor }}">{{ s.open }}</span></td>
+                  <td style="padding:12px 14px;text-align:center"><span style="font-family:'DM Mono',monospace;font-weight:500;color:{{ s.ovColor }}">{{ s.ov }}</span></td>
+                  <td style="padding:12px 20px">
+                    <div style="display:flex;align-items:center;gap:9px">
+                      <div style="flex:1;height:7px;border-radius:5px;background:#F1F2F8;overflow:hidden"><div style="height:100%;border-radius:5px;width:{{ s.onTimeW }};background:{{ s.onTimeFill }}"></div></div>
+                      <span style="font-family:'DM Mono',monospace;font-size:11.5px;color:#5A6175;width:34px;text-align:right">{{ s.onTime }}%</span>
+                    </div>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ hasSupplierSel }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <button onClick="{{ backToSup }}" style="display:flex;align-items:center;gap:6px;background:transparent;border:none;cursor:pointer;color:#6B7186;font-family:'Noto Sans Thai',sans-serif;font-size:13px;font-weight:600;margin-bottom:16px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>กลับไปรายชื่อ Supplier</button>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:18px;padding:24px;margin-bottom:18px;box-shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.03)">
+          <div style="display:flex;align-items:flex-start;gap:16px">
+            <div style="width:52px;height:52px;border-radius:14px;background:{{ accentSoft }};color:{{ accent }};display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:700;font-size:20px">{{ supInitial }}</div>
+            <div style="flex:1">
+              <div style="font-size:19px;font-weight:700;letter-spacing:-.3px">{{ supDetailName }}</div>
+              <div style="font-size:12.5px;color:#8A90A2;font-family:'DM Mono',monospace;margin-top:2px">{{ supDetailCode }} · {{ supDetailDepts }}</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:22px">
+            <div style="background:#F8F9FD;border-radius:12px;padding:14px 16px"><div style="font-size:11px;color:#8A90A2;font-weight:600;margin-bottom:6px">มูลค่ารวม</div><div style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;letter-spacing:-.5px">{{ supDetailAmount }}</div></div>
+            <div style="background:#F8F9FD;border-radius:12px;padding:14px 16px"><div style="font-size:11px;color:#8A90A2;font-weight:600;margin-bottom:6px">รายการทั้งหมด</div><div style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px">{{ supDetailLines }}</div></div>
+            <div style="background:#FFF7EF;border-radius:12px;padding:14px 16px"><div style="font-size:11px;color:#B5860B;font-weight:600;margin-bottom:6px">ค้างส่ง</div><div style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;color:#DA6B16">{{ supDetailOpen }}</div></div>
+            <div style="background:#FFF1F2;border-radius:12px;padding:14px 16px"><div style="font-size:11px;color:#B91C36;font-weight:600;margin-bottom:6px">เกินกำหนด</div><div style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;color:#E5364B">{{ supDetailOv }}</div></div>
+            <div style="background:#EDFAF3;border-radius:12px;padding:14px 16px"><div style="font-size:11px;color:#0E9E6E;font-weight:600;margin-bottom:6px">รับของครบ</div><div style="font-family:'Sora',sans-serif;font-weight:700;font-size:19px;color:#0E9E6E">{{ supDetailOnTime }}%</div></div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.04)">
+          <div style="padding:15px 20px;font-size:14px;font-weight:700;border-bottom:1px solid #ECEDF4">รายการ PO ของ Supplier นี้</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+            <thead><tr style="background:#FAFBFD">
+              <th style="text-align:left;padding:11px 20px;font-weight:600;color:#6B7186;font-size:11.5px;border-bottom:1px solid #ECEDF4">PO No.</th>
+              <th style="text-align:left;padding:11px 12px;font-weight:600;color:#6B7186;font-size:11.5px;border-bottom:1px solid #ECEDF4">กำหนดส่ง</th>
+              <th style="text-align:left;padding:11px 12px;font-weight:600;color:#6B7186;font-size:11.5px;border-bottom:1px solid #ECEDF4">สถานะ</th>
+              <th style="text-align:left;padding:11px 12px;font-weight:600;color:#6B7186;font-size:11.5px;border-bottom:1px solid #ECEDF4">รายการสินค้า</th>
+              <th style="text-align:right;padding:11px 20px;font-weight:600;color:#6B7186;font-size:11.5px;border-bottom:1px solid #ECEDF4">มูลค่า (฿)</th>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{ supDetailPos }}" as="r" hint-placeholder-count="6">
+                <tr onClick="{{ r.onClick }}" style="border-bottom:1px solid #F2F3F8;cursor:pointer" style-hover="background:#FAFBFE">
+                  <td style="padding:10px 20px;font-family:'DM Mono',monospace;font-size:12px">{{ r.poNo }}</td>
+                  <td style="padding:10px 12px;font-family:'DM Mono',monospace;font-size:12px">{{ r.dueFmt }}</td>
+                  <td style="padding:10px 12px"><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;background:{{ r.bBg }};color:{{ r.bColor }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.bDot }}"></span>{{ r.badge }}</span></td>
+                  <td style="padding:10px 12px"><div style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.itemName }}</div></td>
+                  <td style="padding:10px 20px;text-align:right;font-family:'DM Mono',monospace;font-size:12px">{{ r.amountFmt }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+    </sc-if>
+  </main>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastOn }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:#171A2B;color:#fff;padding:13px 20px;border-radius:12px;font-size:13px;box-shadow:0 12px 32px rgba(0,0,0,.25);z-index:300;display:flex;align-items:center;gap:10px;max-width:80vw">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9CFFC9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>{{ toastMsg }}
+    </div>
+  </sc-if>
+
+  <!-- PO DETAIL MODAL -->
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;background:rgba(20,26,46,.45);backdrop-filter:blur(3px);z-index:250;display:flex;align-items:center;justify-content:center;padding:30px">
+      <div onClick="{{ stop }}" style="background:#fff;border-radius:20px;width:760px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.3)">
+        <div style="padding:22px 26px 18px;border-bottom:1px solid #ECEDF4;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;position:sticky;top:0;background:#fff;z-index:2">
+          <div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:{{ accent }};background:{{ accentSoft }};padding:3px 10px;border-radius:8px">PO {{ modalPoNo }}</span>
+              <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:20px;font-size:11.5px;font-weight:600;background:{{ modalBBg }};color:{{ modalBColor }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ modalBDot }}"></span>{{ modalBadge }}</span>
+            </div>
+            <div style="font-size:17px;font-weight:700;margin-top:9px;letter-spacing:-.3px">{{ modalItemName }}</div>
+            <div style="font-size:12.5px;color:#8A90A2;margin-top:2px">{{ modalVendor }}</div>
+          </div>
+          <button onClick="{{ closeModal }}" style="width:32px;height:32px;min-width:32px;border:none;background:#F2F3F8;border-radius:9px;cursor:pointer;font-size:16px;color:#6B7186;display:flex;align-items:center;justify-content:center">✕</button>
+        </div>
+        <div style="padding:22px 26px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px 20px">
+            <div><div style="font-size:10.5px;font-weight:700;color:#A0A6B6;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Line Item</div><div style="font-family:'DM Mono',monospace;font-size:13.5px">{{ modalLine }}</div></div>
+            <div><div style="font-size:10.5px;font-weight:700;color:#A0A6B6;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">วันที่ออก PO</div><div style="font-family:'DM Mono',monospace;font-size:13.5px">{{ modalPoDate }}</div></div>
+            <div><div style="font-size:10.5px;font-weight:700;color:#A0A6B6;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">สถานะ PO</div><div style="font-size:13.5px;font-weight:600">{{ modalPoStatus }}</div></div>
+          </div>
+          <hr style="border:none;border-top:1px solid #F0F1F6;margin:18px 0">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px 20px">
+            <div style="grid-column:1/3"><div style="font-size:10.5px;font-weight:700;color:#A0A6B6;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">Supplier</div><div style="font-size:14px;font-weight:600">{{ modalVendor }}</div></div>
+            <div><div style="font-size:10.5px;font-weight:700;color:#A0A6B6;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">รหัสผู้ขาย</div><div style="font-family:'DM Mono',monospace;font-size:13.5px">{{ modalVendorCode }}</div></div>
+            <div><div style="font-size:10.5px;font-weight:700;color:#A0A6B6;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">รหัสสินค้า</div><div style="font-family:'DM Mono',monospace;font-size:13.5px">{{ modalItemCode }}</div></div>
+            <div><div style="font-size:10.5px;font-weight:700;color:#A0A6B6;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">แผนก/ฝ่าย</div><div style="font-size:13.5px">{{ modalDept }}</div></div>
+            <div><div style="font-size:10.5px;font-weight:700;color:#A0A6B6;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">ผู้ประสงค์ใช้</div><div style="font-size:13.5px">{{ modalRequester }}</div></div>
+          </div>
+          <div style="background:#F8F9FD;border-radius:14px;padding:18px 20px;margin-top:20px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px">
+            <div><div style="font-size:10.5px;font-weight:700;color:#A0A6B6;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">จำนวน</div><div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:500">{{ modalQty }}</div></div>
+            <div><div style="font-size:10.5px;font-weight:700;color:#A0A6B6;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">ราคา/หน่วย</div><div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:500">{{ modalUnitPrice }}</div></div>
+            <div><div style="font-size:10.5px;font-weight:700;color:#A0A6B6;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">มูลค่า PO</div><div style="font-family:'Sora',sans-serif;font-size:18px;font-weight:700;color:{{ accent }};letter-spacing:-.5px">{{ modalAmount }}</div></div>
+            <div><div style="font-size:10.5px;font-weight:700;color:#A0A6B6;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">ค้างรับ</div><div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:500">{{ modalPending }}</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px">
+            <div style="border:1px solid #ECEDF4;border-radius:14px;padding:16px 18px">
+              <div style="font-size:12px;font-weight:700;color:#3A4055;margin-bottom:13px;display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:50%;background:{{ modalBDot }}"></span>กำหนดส่ง</div>
+              <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.5px">{{ modalDue }}</div>
+              <div style="font-size:12.5px;color:{{ modalBColor }};font-weight:600;margin-top:4px">{{ modalDayDesc }}</div>
+            </div>
+            <div style="border:1px solid #ECEDF4;border-radius:14px;padding:16px 18px">
+              <div style="font-size:12px;font-weight:700;color:#3A4055;margin-bottom:13px">การรับของ (GRPO)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px 14px">
+                <div><div style="font-size:10px;color:#A0A6B6">สถานะ</div><div style="font-size:12.5px;font-weight:600">{{ modalGrpoStatus }}</div></div>
+                <div><div style="font-size:10px;color:#A0A6B6">วันที่รับ</div><div style="font-family:'DM Mono',monospace;font-size:12.5px">{{ modalRecvDate }}</div></div>
+                <div><div style="font-size:10px;color:#A0A6B6">เลขที่ GRPO</div><div style="font-family:'DM Mono',monospace;font-size:12.5px">{{ modalGrpoNo }}</div></div>
+                <div><div style="font-size:10px;color:#A0A6B6">ปริมาณรับ</div><div style="font-family:'DM Mono',monospace;font-size:12.5px">{{ modalRecvQty }}</div></div>
+              </div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#A0A6B6;margin-top:16px;text-align:right">ผู้สร้าง PO: {{ modalCreatedBy }}</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#5B5BF5&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;compactRows&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;showReceived&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { d:null, screen:'dashboard', search:'', status:'all', dept:'', from:'', to:'', sortKey:'dueDate', sortDir:1, page:1, modal:null, supplier:null, toast:'' };
+
+  componentDidMount(){
+    const t=(n)=>{ if(window.KST_DATA) this.setState({d:window.KST_DATA}); else if(n<80) setTimeout(()=>t(n+1),40); };
+    t(0);
+  }
+
+  SM = {
+    ov:{label:'เกินกำหนด', color:'#E5364B', bg:'#FFF0F2', dot:'#F43F5E'},
+    du:{label:'ถึงกำหนด', color:'#DA6B16', bg:'#FFF3E6', dot:'#FB923C'},
+    ne:{label:'ใกล้กำหนด', color:'#B5860B', bg:'#FBF4DE', dot:'#EAB308'},
+    ok:{label:'ยังมีเวลา', color:'#0E9E6E', bg:'#E7F9F1', dot:'#10B981'},
+    dn:{label:'รับแล้ว', color:'#3A6FF0', bg:'#EBF1FE', dot:'#3B82F6'},
+    ca:{label:'ยกเลิก', color:'#7E8497', bg:'#F1F2F6', dot:'#A0A6B6'}
+  };
+  meta(s){ return this.SM[s] || this.SM.ca; }
+  hexA(h,a){ h=(h||'#5B5BF5').replace('#',''); if(h.length===3)h=h.split('').map(x=>x+x).join(''); const n=parseInt(h,16); return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`; }
+  money(n){ return Number(n||0).toLocaleString('en-US',{maximumFractionDigits:0}); }
+  compact(n){ n=Number(n||0); const a=Math.abs(n); if(a>=1e6) return (n/1e6).toLocaleString('en-US',{maximumFractionDigits:2})+' ล้าน'; if(a>=1e3) return Math.round(n/1e3).toLocaleString('en-US')+'K'; return n.toLocaleString('en-US'); }
+  fdate(s){ if(!s) return '—'; const d=new Date(s); if(isNaN(d)) return String(s); return d.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'}); }
+  vshort(v){ if(!v) return ''; return v.replace(/^(บริษัท|ห้างหุ้นส่วนจำกัด|บมจ\.|หจก\.)\s*/,'').replace(/\s*จำกัด.*$/,'').trim() || v; }
+  dayTxt(r){ if(r.status==='dn'||r.status==='ca'||r.days===null||r.days===undefined) return '—'; return (r.days<0?'':'+')+r.days; }
+  badgeLabel(r){ const d=r.days; if(r.status==='ov') return 'เกิน '+Math.abs(d)+' วัน'; if(r.status==='du') return d===0?'วันนี้':'อีก '+d+' วัน'; if((r.status==='ne'||r.status==='ok')&&d!=null) return 'อีก '+d+' วัน'; return this.meta(r.status).label; }
+
+  row(r){
+    const M=this.meta(r.status);
+    return Object.assign({}, r, {
+      onClick:()=>this.setState({modal:r}),
+      dueFmt:this.fdate(r.dueDate), recvFmt:this.fdate(r.receiveDate),
+      amountFmt:this.money(r.amount), qtyText:(r.qty||0)+' '+(r.unit||''),
+      vshort:this.vshort(r.vendorName), dayTxt:this.dayTxt(r), dayColor:M.color,
+      badge:this.badgeLabel(r), bColor:M.color, bBg:M.bg, bDot:M.dot,
+      received:(r.status==='dn'), notReceived:(r.status!=='dn'),
+      department:r.department||'—'
+    });
+  }
+
+  go(s){ this.setState({screen:s, supplier:null}); }
+  srt(k){ this.setState(st=>({sortKey:k, sortDir: st.sortKey===k? -st.sortDir : 1})); }
+  showToast(m){ this.setState({toast:m}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:''}),3200); }
+
+  renderVals(){
+    const d=this.state.d;
+    const accent=this.props.accentColor ?? '#5B5BF5';
+    const accentSoft=this.hexA(accent,0.10);
+    const accentGlow=this.hexA(accent,0.32);
+    const dense=this.props.compactRows ?? false;
+    const showRecv=this.props.showReceived ?? true;
+    const screen=this.state.screen;
+    const kc=(d&&d.kpi)||{all:0,ov:0,du:0,ne:0,ok:0,dn:0,ca:0};
+
+    const navFg=(k)=> screen===k? accent : '#6B7186';
+    const navBg=(k)=> screen===k? accentSoft : 'transparent';
+
+    const td=new Date((d&&d.today)||'2026-06-24');
+    const todayFmt=td.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
+
+    // ── KPI cards ──
+    const openCount=(kc.ov||0)+(kc.du||0)+(kc.ne||0)+(kc.ok||0);
+    const kdef=[
+      {key:'all', label:'PO ทั้งหมด', value:(kc.all||0).toLocaleString(), color:'#171A2B', dot:accent, bg:'#FFFFFF', bd:'#ECEDF4', sub:((d&&d.totalSuppliers)||0)+' suppliers · ค้างส่ง '+this.compact(openCount)+' รายการ'},
+      {key:'ov', label:'เกินกำหนด', value:(kc.ov||0).toLocaleString(), color:'#E5364B', dot:'#F43F5E', bg:'#FFF4F5', bd:'#FBDEE2', sub:'มูลค่า '+this.compact((d&&d.overdueVal)||0)+' ฿'},
+      {key:'du', label:'ถึงกำหนด', value:(kc.du||0).toLocaleString(), color:'#DA6B16', dot:'#FB923C', bg:'#FFF7EF', bd:'#FBE6CF', sub:'ภายใน 0–3 วัน'},
+      {key:'ne', label:'ใกล้กำหนด', value:(kc.ne||0).toLocaleString(), color:'#B5860B', dot:'#EAB308', bg:'#FCF8E8', bd:'#F1E6BC', sub:'อีก 4–7 วัน'},
+      {key:'ok', label:'ยังมีเวลา', value:(kc.ok||0).toLocaleString(), color:'#0E9E6E', dot:'#10B981', bg:'#EDFAF3', bd:'#CCEFDD', sub:'มากกว่า 7 วัน'},
+      {key:'dn', label:'รับแล้ว / ปิด', value:(kc.dn||0).toLocaleString(), color:'#3A6FF0', dot:'#3B82F6', bg:'#EFF3FE', bd:'#D6E1FB', sub:'รับของครบ / ปิด PO'}
+    ];
+    const kpis=kdef.map(k=>Object.assign(k,{onClick:()=>this.setState({screen:'pos', status:k.key, page:1, supplier:null})}));
+
+    // ── donut (open statuses) ──
+    const segDefs=['ov','du','ne','ok'];
+    const openTotal=segDefs.reduce((a,s)=>a+(kc[s]||0),0);
+    const ot=openTotal||1;
+    let accP=0; const donutSegs=segDefs.map(s=>{ const v=kc[s]||0; const pct=v/ot*100; const seg={key:s,label:this.meta(s).label,count:v,pctTxt:Math.round(pct)+'%',color:this.meta(s).dot,start:accP,end:accP+pct}; accP+=pct; return seg; });
+    const donutGrad='conic-gradient('+donutSegs.map(s=>`${s.color} ${s.start}% ${s.end}%`).join(',')+')';
+
+    // ── monthly bars ──
+    const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    const tmo=((d&&d.today)||'2026-06').slice(0,7);
+    const mrows=((d&&d.monthly)||[]).filter(x=>x.mo>=tmo).slice(0,7);
+    const maxC=Math.max(1,...mrows.map(x=>x.count));
+    const bars=mrows.map((x,i)=>{ const mi=parseInt(x.mo.slice(5,7),10)-1; return {label:months[mi], yr:x.mo.slice(2,4), count:x.count, amount:this.compact(x.amount), hPct:Math.max(5,Math.round(x.count/maxC*100))+'%', fill: i===0? accent : this.hexA(accent,0.42)}; });
+
+    // ── top suppliers (open value) ──
+    const tsAll=((d&&d.suppliers)||[]).filter(s=>s.open>0).sort((a,b)=>b.amount-a.amount).slice(0,6);
+    const maxA=Math.max(1,...tsAll.map(s=>s.amount));
+    const topSup=tsAll.map(s=>({name:this.vshort(s.name), open:s.open, ov:s.ov, amount:this.compact(s.amount), w:Math.max(5,Math.round(s.amount/maxA*100))+'%', fill: s.ov>0? '#F43F5E' : accent}));
+
+    // ── overdue list (dashboard) ──
+    const overdueList=((d&&d.pos)||[]).filter(r=>r.status==='ov').sort((a,b)=>a.days-b.days).slice(0,6).map(r=>this.row(r));
+
+    // ── PO list filtering ──
+    let rows=((d&&d.pos)||[]).slice();
+    if(!showRecv) rows=rows.filter(r=>r.status!=='dn');
+    if(this.state.status!=='all') rows=rows.filter(r=>r.status===this.state.status);
+    if(this.state.dept) rows=rows.filter(r=>r.department===this.state.dept);
+    if(this.state.from) rows=rows.filter(r=>r.dueDate&&r.dueDate>=this.state.from);
+    if(this.state.to) rows=rows.filter(r=>r.dueDate&&r.dueDate<=this.state.to);
+    const q=this.state.search.trim().toLowerCase();
+    if(q) rows=rows.filter(r=>((r.vendorName||'')+(r.poNo||'')+(r.itemName||'')+(r.itemCode||'')+(r.prNo||'')).toLowerCase().includes(q));
+    const sk=this.state.sortKey, sd=this.state.sortDir;
+    rows.sort((a,b)=>{ let va=a[sk], vb=b[sk]; if(va==null) return 1; if(vb==null) return -1; if(typeof va==='string') return va.localeCompare(vb,'th')*sd; return (va-vb)*sd; });
+    const total=rows.length, PP=40;
+    const pages=Math.max(1,Math.ceil(total/PP));
+    const page=Math.min(this.state.page,pages);
+    const start=(page-1)*PP;
+    const pageRows=rows.slice(start,start+PP).map(r=>this.row(r));
+    const countText= total? ('แสดง '+(start+1)+'–'+Math.min(start+PP,total)+' จาก '+total.toLocaleString()+' รายการ') : 'ไม่พบรายการตามตัวกรอง';
+    const pageInfo='หน้า '+page+'/'+pages;
+
+    // pagination items
+    let toks=[];
+    if(pages<=7){ for(let i=1;i<=pages;i++) toks.push(i); }
+    else { toks=[1]; if(page>3) toks.push('…'); for(let i=Math.max(2,page-1);i<=Math.min(pages-1,page+1);i++) toks.push(i); if(page<pages-2) toks.push('…'); toks.push(pages); }
+    const pagItems=toks.map(t=> t==='…'
+      ? {label:'…', bg:'transparent', fg:'#A0A6B6', bd:'transparent', onClick:()=>{}}
+      : {label:''+t, bg:(t===page?accent:'#fff'), fg:(t===page?'#fff':'#5A6175'), bd:(t===page?accent:'#E2E4EF'), onClick:()=>this.setState({page:t})});
+
+    // status chips — counts from the sample so they match what the table shows
+    const allPos=(d&&d.pos)||[];
+    const scnt={all:allPos.length,ov:0,du:0,ne:0,ok:0,dn:0,ca:0};
+    allPos.forEach(r=>{ if(scnt[r.status]!==undefined) scnt[r.status]++; });
+    const chipDefs=[['all','ทั้งหมด'],['ov','เกินกำหนด'],['du','ถึงกำหนด'],['ne','ใกล้กำหนด'],['ok','ยังมีเวลา'],['dn','รับแล้ว']];
+    const chips=chipDefs.map(([key,label])=>{ const active=this.state.status===key; const M= key==='all'? {color:accent,bg:accentSoft,dot:accent} : this.meta(key); const cnt= scnt[key]||0; return {key,label,count:cnt.toLocaleString(), dot:M.dot, fg: active?'#fff':M.color, bg: active? M.color : M.bg, bd: active? M.color : 'transparent', onClick:()=>this.setState({status:key,page:1})}; });
+
+    // dept options
+    const deptOpts=((d&&d.depts)||[]).map(x=>({value:x.dept,label:x.dept}));
+
+    // ── suppliers ──
+    const supplierRows=((d&&d.suppliers)||[]).slice(0,50).map(s=>({
+      name:this.vshort(s.name), full:s.name, code:s.code, lines:s.lines, amount:this.money(s.amount),
+      open:s.open, ov:s.ov, onTime:s.onTime, onTimeW:s.onTime+'%',
+      onTimeFill: s.onTime>=85? '#10B981' : s.onTime>=60? '#EAB308' : '#F43F5E',
+      openColor: s.open>0? '#DA6B16' : '#A0A6B6', ovColor: s.ov>0? '#E5364B' : '#A0A6B6',
+      onClick:()=>this.setState({supplier:s.name})
+    }));
+
+    // supplier detail
+    const selName=this.state.supplier;
+    const selObj=selName? ((d&&d.suppliers)||[]).find(s=>s.name===selName) : null;
+    const supDetailPos= selName? ((d&&d.pos)||[]).filter(r=>r.vendorName===selName).sort((a,b)=>(a.days??9999)-(b.days??9999)).map(r=>this.row(r)) : [];
+
+    // modal
+    const mo=this.state.modal;
+    const mM= mo? this.meta(mo.status) : this.SM.ca;
+    const dayDesc= mo? (mo.days==null?'—': mo.days<0? ('เกินกำหนดมาแล้ว '+Math.abs(mo.days)+' วัน') : mo.days===0? 'วันนี้เป็นวันครบกำหนด' : 'เหลืออีก '+mo.days+' วัน') : '';
+
+    return {
+      accent, accentSoft, accentGlow,
+      rowPad: dense? '7px' : '11px',
+      isDashboard: screen==='dashboard', isPos: screen==='pos', isSuppliers: screen==='suppliers',
+      goDash:()=>this.go('dashboard'), goPos:()=>this.go('pos'), goSup:()=>this.go('suppliers'),
+      goOverdue:()=>this.setState({screen:'pos', status:'ov', page:1, supplier:null}),
+      dashFg:navFg('dashboard'), dashBg:navBg('dashboard'),
+      posFg:navFg('pos'), posBg:navBg('pos'),
+      supFg:navFg('suppliers'), supBg:navBg('suppliers'),
+      posCountBg: screen==='pos'? this.hexA(accent,0.18):'#F1F2F8', posCountFg: screen==='pos'? accent:'#8A90A2',
+      openCountTxt: openCount.toLocaleString(),
+      todayFmt,
+      importClick:()=>this.showToast('การนำเข้า Excel จะทำงานเต็มรูปแบบในเวอร์ชันโปรดักชัน (Next.js + ฐานข้อมูล)'),
+      exportClick:()=>this.showToast('กำลังเตรียมไฟล์รายงานตามตัวกรองปัจจุบัน…'),
+      // dashboard
+      hasOverdue: (kc.ov||0)>0, ovCount:(kc.ov||0).toLocaleString(), ovValue:this.compact((d&&d.overdueVal)||0),
+      kpis,
+      donutGrad, donutSegs, openTotalTxt: openTotal.toLocaleString(),
+      bars, topSup, overdueList,
+      // po list
+      search:this.state.search, dept:this.state.dept, from:this.state.from, to:this.state.to,
+      onSearch:(e)=>this.setState({search:e.target.value,page:1}),
+      onDept:(e)=>this.setState({dept:e.target.value,page:1}),
+      onFrom:(e)=>this.setState({from:e.target.value,page:1}),
+      onTo:(e)=>this.setState({to:e.target.value,page:1}),
+      resetF:()=>this.setState({search:'',status:'all',dept:'',from:'',to:'',page:1}),
+      chips, deptOpts, pageRows, countText, pageInfo, pagItems,
+      prevClick:()=>this.setState(s=>({page:Math.max(1,s.page-1)})),
+      nextClick:()=>this.setState(s=>({page:Math.min(pages,s.page+1)})),
+      sortPo:()=>this.srt('poNo'), sortDue:()=>this.srt('dueDate'), sortDays:()=>this.srt('days'), sortSup:()=>this.srt('vendorName'), sortAmt:()=>this.srt('amount'),
+      // suppliers
+      supplierRows, supplierCountTxt:'ทั้งหมด '+(((d&&d.suppliers)||[]).length)+' ราย (แสดง 50 อันดับแรก)',
+      noSupplierSel: !selName, hasSupplierSel: !!selName, backToSup:()=>this.setState({supplier:null}),
+      supDetailName: selName||'', supInitial:(this.vshort(selName||'?')[0]||'?'),
+      supDetailCode: selObj? selObj.code : '', supDetailDepts: selObj? (selObj.depts||[]).slice(0,3).join(', ') : '',
+      supDetailAmount: selObj? this.compact(selObj.amount)+' ฿' : '—',
+      supDetailLines: selObj? selObj.lines : 0, supDetailOpen: selObj? selObj.open : 0,
+      supDetailOv: selObj? selObj.ov : 0, supDetailOnTime: selObj? selObj.onTime : 0,
+      supDetailPos,
+      // toast / modal
+      toastOn: !!this.state.toast, toastMsg:this.state.toast,
+      stop:(e)=>{ e.stopPropagation(); },
+      modalOpen: !!mo, closeModal:()=>this.setState({modal:null}),
+      modalPoNo: mo?mo.poNo:'', modalBadge: mo?this.badgeLabel(mo):'', modalBBg:mM.bg, modalBColor:mM.color, modalBDot:mM.dot,
+      modalItemName: mo?mo.itemName:'', modalVendor: mo?mo.vendorName:'',
+      modalLine: mo?(mo.lineItem||'—'):'', modalPoDate: mo?this.fdate(mo.poDate):'', modalPoStatus: mo?mo.poStatus:'',
+      modalVendorCode: mo?mo.vendorCode:'', modalItemCode: mo?mo.itemCode:'', modalDept: mo?(mo.department||'—'):'', modalRequester: mo?(mo.requester||'—'):'',
+      modalQty: mo?((mo.qty||0)+' '+(mo.unit||'')):'', modalUnitPrice: mo?this.money(mo.unitPrice):'', modalAmount: mo?(this.money(mo.amount)+' ฿'):'', modalPending: mo?((mo.pendingQty||0)+' '+(mo.unit||'')):'',
+      modalDue: mo?this.fdate(mo.dueDate):'', modalDayDesc:dayDesc,
+      modalGrpoStatus: mo?(mo.grpoStatus||'—'):'', modalRecvDate: mo?this.fdate(mo.receiveDate):'', modalGrpoNo: mo?(mo.grpoNo||'—'):'', modalRecvQty: mo?((mo.receiveQty||0)+' '+(mo.unit||'')):'',
+      modalCreatedBy: mo?(mo.createdBy||'—'):''
+    };
+  }
+}
+</script>
+</body>
+</html>
