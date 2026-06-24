@@ -1,0 +1,37 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: #F3F4FA;
+  font-family: 'Noto Sans Thai', 'Sarabun', 'Leelawadee UI', 'Tahoma', system-ui, sans-serif;
+  color: #171A2B;
+  font-size: 13px;
+}
+button { font-family: inherit; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #D4D7E4; border-radius: 8px; border: 2px solid #F3F4FA; }
+::-webkit-scrollbar-thumb:hover { background: #BFC3D6; }
+
+@keyframes kstpulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+
+/* hover helpers (replacing the design runtime's style-hover) */
+.hov-card { transition: transform .14s, box-shadow .14s; }
+.hov-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(16, 24, 40, .08) !important; }
+.hov-banner { transition: box-shadow .16s; }
+.hov-banner:hover { box-shadow: 0 8px 24px rgba(229, 54, 75, .10); }
+.hov-row { transition: background .12s; }
+.hov-row:hover { background: #FAFBFE; }
+.hov-btn { transition: border-color .14s, box-shadow .14s; }
+.hov-btn:hover { border-color: #CBCFE0; box-shadow: 0 2px 8px rgba(16, 24, 40, .06); }
+.hov-link { transition: opacity .12s; }
+.hov-link:hover { opacity: .78; }
+.nav-item { transition: all .14s; }
+
+input:focus, select:focus {
+  border-color: var(--accent, #5B5BF5) !important;
+  box-shadow: 0 0 0 3px var(--accentGlow, rgba(91, 91, 245, .32));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
