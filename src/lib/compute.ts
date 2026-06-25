@@ -112,31 +112,55 @@ export interface Dataset {
 export function buildDataset(rows: PoRow[], today: string): Dataset {
   const pos = normalizeRows(rows, today);
 
-  const kpi: Record<string, number> = { all: pos.length, ov: 0, du: 0, ne: 0, ok: 0, dn: 0, ca: 0 };
+  // A single PO (unique poNo) can span several line items. Headline COUNTS
+  // ("PO ทั้งหมด", per-status KPI, supplier/dept/monthly รายการ) count distinct
+  // POs — a PO's status is its most-urgent line (ov > du > ne > ok > dn > ca),
+  // so a PO counts as "received" only when every line is received.
+  // Monetary values stay line-item based (money is summed per line, not per PO).
+  const PO_PRIO: Record<string, number> = { ov: 0, du: 1, ne: 2, ok: 3, dn: 4, ca: 5 };
+  const poGroups: Record<string, any> = {};
+  let poSeq = 0;
+  for (const r of pos) {
+    const key = r.poNo ? "PO:" + r.poNo : "ID:" + (r.id != null ? r.id : ++poSeq);
+    const g = (poGroups[key] ||= {
+      poNo: r.poNo, vendorName: r.vendorName || "(ไม่ระบุผู้ขาย)", vendorCode: r.vendorCode || "",
+      department: r.department || "(ไม่ระบุแผนก)", status: r.status, prio: 99, amount: 0,
+      dueDate: r.dueDate, approved: false,
+    });
+    g.amount += toNum(r.amount);
+    const p = PO_PRIO[r.status as string];
+    if (p !== undefined && p < g.prio) { g.prio = p; g.status = r.status; g.dueDate = r.dueDate; }
+    if (/approv|อนุมัติ/i.test(String(r.approveAVL || ""))) g.approved = true;
+    if (!g.vendorCode && r.vendorCode) g.vendorCode = r.vendorCode;
+  }
+  const poRows: any[] = Object.values(poGroups);
+
+  const kpi: Record<string, number> = { all: poRows.length, ov: 0, du: 0, ne: 0, ok: 0, dn: 0, ca: 0 };
+  for (const g of poRows) { if (kpi[g.status] !== undefined) kpi[g.status]++; }
+
   let openVal = 0;
   let overdueVal = 0;
   for (const r of pos) {
     const s = r.status as string;
-    if (kpi[s] !== undefined) kpi[s]++;
     if (OPEN[s]) openVal += toNum(r.amount);
     if (s === "ov") overdueVal += toNum(r.amount);
   }
 
   const sMap: Record<string, any> = {};
-  for (const r of pos) {
-    const key = r.vendorName || "(ไม่ระบุผู้ขาย)";
-    const s = (sMap[key] ||= { name: key, code: r.vendorCode || "", lines: 0, amount: 0, open: 0, ov: 0, du: 0, ne: 0, received: 0, approvedLines: 0, depts: {} as Record<string, true> });
-    s.lines++;
-    s.amount += toNum(r.amount);
-    const st = r.status as string;
+  for (const g of poRows) {
+    const key = g.vendorName;
+    const s = (sMap[key] ||= { name: key, code: g.vendorCode || "", lines: 0, amount: 0, open: 0, ov: 0, du: 0, ne: 0, received: 0, approvedPOs: 0, depts: {} as Record<string, true> });
+    s.lines++; // distinct POs for this vendor
+    s.amount += g.amount;
+    const st = g.status as string;
     if (OPEN[st]) s.open++;
     if (st === "ov") s.ov++;
     if (st === "du") s.du++;
     if (st === "ne") s.ne++;
     if (st === "dn") s.received++;
-    if (/approv|อนุมัติ/i.test(String(r.approveAVL || ""))) s.approvedLines++;
-    if (r.department) s.depts[r.department] = true;
-    if (!s.code && r.vendorCode) s.code = r.vendorCode;
+    if (g.approved) s.approvedPOs++;
+    if (g.department) s.depts[g.department] = true;
+    if (!s.code && g.vendorCode) s.code = g.vendorCode;
   }
   const suppliers = Object.values(sMap)
     .map((s: any) => {
@@ -149,15 +173,15 @@ export function buildDataset(rows: PoRow[], today: string): Dataset {
         name: s.name, code: s.code, lines: s.lines, amount: Math.round(s.amount),
         open: s.open, ov: s.ov, du: s.du, ne: s.ne, received: s.received,
         onTime,
-        approved: s.approvedLines > 0,
-        approvedLines: s.approvedLines,
+        approved: s.approvedPOs > 0,
+        approvedLines: s.approvedPOs,
         score, grade,
         depts: Object.keys(s.depts),
       };
     })
     .sort((a, b) => b.amount - a.amount);
 
-  // Approved Vendor List (AVL) — suppliers with at least one approved PO line,
+  // Approved Vendor List (AVL) — suppliers with at least one approved PO,
   // ranked by evaluation score for the supplier-assessment screen.
   const approvedSuppliers = suppliers
     .filter((s) => s.approved)
@@ -165,12 +189,12 @@ export function buildDataset(rows: PoRow[], today: string): Dataset {
     .sort((a, b) => b.score - a.score || b.amount - a.amount);
 
   const dMap: Record<string, any> = {};
-  for (const r of pos) {
-    const key = r.department || "(ไม่ระบุแผนก)";
+  for (const g of poRows) {
+    const key = g.department || "(ไม่ระบุแผนก)";
     const x = (dMap[key] ||= { dept: key, lines: 0, amount: 0, open: 0, ov: 0 });
     x.lines++;
-    x.amount += toNum(r.amount);
-    const st = r.status as string;
+    x.amount += g.amount;
+    const st = g.status as string;
     if (OPEN[st]) x.open++;
     if (st === "ov") x.ov++;
   }
@@ -179,13 +203,13 @@ export function buildDataset(rows: PoRow[], today: string): Dataset {
     .sort((a, b) => b.amount - a.amount);
 
   const mMap: Record<string, any> = {};
-  for (const r of pos) {
-    if (!OPEN[r.status as string] || !r.dueDate) continue;
-    const mo = String(r.dueDate).slice(0, 7);
+  for (const g of poRows) {
+    if (!OPEN[g.status as string] || !g.dueDate) continue;
+    const mo = String(g.dueDate).slice(0, 7);
     if (!/^\d{4}-\d{2}$/.test(mo)) continue;
     const m = (mMap[mo] ||= { mo, count: 0, amount: 0 });
     m.count++;
-    m.amount += toNum(r.amount);
+    m.amount += g.amount;
   }
   const monthly = Object.keys(mMap)
     .sort()

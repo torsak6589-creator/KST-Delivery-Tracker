@@ -235,14 +235,55 @@
     var d=D;
     var accent=ACCENT, accentSoft=hexA(accent,0.10), accentGlow=hexA(accent,0.32);
     var screen=state.screen;
-    var kc=(d&&d.kpi)||{all:0,ov:0,du:0,ne:0,ok:0,dn:0,ca:0};
+    // ── นับ PO เลขไม่ซ้ำเป็น 1 PO: สถานะของ PO = line ที่เร่งด่วนสุด (ov>du>ne>ok>dn>ca) ──
+    // KST_DATA.kpi/suppliers ถูกคำนวณล่วงหน้าแบบราย item จึงคำนวณใหม่จาก pos เพื่อความถูกต้อง
+    // (ยอดเงิน openVal/overdueVal ยังรวมแบบราย item ตามจริง)
+    var __agg=(function(){
+      var pos=(d&&d.pos)||[];
+      var OPEN={ov:1,du:1,ne:1,ok:1}, PRIO={ov:0,du:1,ne:2,ok:3,dn:4,ca:5};
+      var grp={}, seq=0;
+      pos.forEach(function(r){
+        var key=r.poNo? ('PO:'+r.poNo) : ('ID:'+(r.id!=null?r.id:(++seq)));
+        var g=grp[key]||(grp[key]={poNo:r.poNo, vendorName:r.vendorName||'(ไม่ระบุผู้ขาย)', vendorCode:r.vendorCode||'', department:r.department||'(ไม่ระบุแผนก)', status:r.status, prio:99, amount:0, dueDate:r.dueDate, approved:false});
+        g.amount+=(+r.amount||0);
+        var p=PRIO[r.status]; if(p!==undefined&&p<g.prio){g.prio=p;g.status=r.status;g.dueDate=r.dueDate;}
+        if(/approv|อนุมัติ/i.test(String(r.approveAVL||''))) g.approved=true;
+        if(!g.vendorCode&&r.vendorCode) g.vendorCode=r.vendorCode;
+      });
+      var poRows=Object.keys(grp).map(function(k){return grp[k];});
+      var kpi={all:poRows.length,ov:0,du:0,ne:0,ok:0,dn:0,ca:0};
+      poRows.forEach(function(g){ if(kpi[g.status]!==undefined) kpi[g.status]++; });
+      var openVal=0, overdueVal=0;
+      pos.forEach(function(r){ if(OPEN[r.status]) openVal+=(+r.amount||0); if(r.status==='ov') overdueVal+=(+r.amount||0); });
+      var sM={};
+      poRows.forEach(function(g){ var key=g.vendorName; var s=sM[key]||(sM[key]={name:key,code:g.vendorCode||'',lines:0,amount:0,open:0,ov:0,du:0,ne:0,received:0,approvedPOs:0,depts:{}});
+        s.lines++; s.amount+=g.amount;
+        if(OPEN[g.status])s.open++; if(g.status==='ov')s.ov++; if(g.status==='du')s.du++; if(g.status==='ne')s.ne++; if(g.status==='dn')s.received++;
+        if(g.approved)s.approvedPOs++; if(g.department)s.depts[g.department]=true; if(!s.code&&g.vendorCode)s.code=g.vendorCode;
+      });
+      var suppliers=Object.keys(sM).map(function(k){var s=sM[k];
+        var onTime=s.lines?Math.round(s.received/s.lines*100):0;
+        var ovRate=s.lines?(s.ov/s.lines*100):0;
+        var score=Math.max(0,Math.min(100,Math.round(onTime*0.7+(100-ovRate)*0.3)));
+        var grade=score>=85?'A':score>=70?'B':score>=50?'C':'D';
+        return {name:s.name,code:s.code,lines:s.lines,amount:Math.round(s.amount),open:s.open,ov:s.ov,du:s.du,ne:s.ne,received:s.received,onTime:onTime,approved:s.approvedPOs>0,score:score,grade:grade,depts:Object.keys(s.depts)};
+      }).sort(function(a,b){return b.amount-a.amount;});
+      var dM={};
+      poRows.forEach(function(g){var key=g.department||'(ไม่ระบุแผนก)'; var x=dM[key]||(dM[key]={dept:key,lines:0,amount:0,open:0,ov:0}); x.lines++; x.amount+=g.amount; if(OPEN[g.status])x.open++; if(g.status==='ov')x.ov++;});
+      var depts=Object.keys(dM).map(function(k){var x=dM[k];return {dept:x.dept,lines:x.lines,amount:Math.round(x.amount),open:x.open,ov:x.ov};}).sort(function(a,b){return b.amount-a.amount;});
+      var mM={};
+      poRows.forEach(function(g){ if(!OPEN[g.status]||!g.dueDate) return; var mo=String(g.dueDate).slice(0,7); if(!/^\d{4}-\d{2}$/.test(mo))return; var m=mM[mo]||(mM[mo]={mo:mo,count:0,amount:0}); m.count++; m.amount+=g.amount; });
+      var monthly=Object.keys(mM).sort().map(function(k){return {mo:k,count:mM[k].count,amount:Math.round(mM[k].amount)};});
+      return {kpi:kpi,openVal:Math.round(openVal),overdueVal:Math.round(overdueVal),suppliers:suppliers,depts:depts,monthly:monthly,totalSuppliers:suppliers.length};
+    })();
+    var kc=__agg.kpi;
     var td=new Date((d&&d.today)||'2026-06-24');
     var todayFmt=td.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
 
     var openCount=(kc.ov||0)+(kc.du||0)+(kc.ne||0)+(kc.ok||0);
     var kdef=[
-      {key:'all', label:'PO ทั้งหมด', value:(kc.all||0).toLocaleString(), color:'#171A2B', dot:accent, bg:'#FFFFFF', bd:'#ECEDF4', sub:((d&&d.totalSuppliers)||0)+' suppliers · ค้างส่ง '+compact(openCount)+' รายการ'},
-      {key:'ov', label:'เกินกำหนด', value:(kc.ov||0).toLocaleString(), color:'#E5364B', dot:'#F43F5E', bg:'#FFF4F5', bd:'#FBDEE2', sub:'มูลค่า '+compact((d&&d.overdueVal)||0)+' ฿'},
+      {key:'all', label:'PO ทั้งหมด', value:(kc.all||0).toLocaleString(), color:'#171A2B', dot:accent, bg:'#FFFFFF', bd:'#ECEDF4', sub:(__agg.totalSuppliers||0)+' suppliers · ค้างส่ง '+compact(openCount)+' รายการ'},
+      {key:'ov', label:'เกินกำหนด', value:(kc.ov||0).toLocaleString(), color:'#E5364B', dot:'#F43F5E', bg:'#FFF4F5', bd:'#FBDEE2', sub:'มูลค่า '+compact(__agg.overdueVal||0)+' ฿'},
       {key:'du', label:'ถึงกำหนด', value:(kc.du||0).toLocaleString(), color:'#DA6B16', dot:'#FB923C', bg:'#FFF7EF', bd:'#FBE6CF', sub:'ภายใน 0–3 วัน'},
       {key:'ne', label:'ใกล้กำหนด', value:(kc.ne||0).toLocaleString(), color:'#B5860B', dot:'#EAB308', bg:'#FCF8E8', bd:'#F1E6BC', sub:'อีก 4–7 วัน'},
       {key:'ok', label:'ยังมีเวลา', value:(kc.ok||0).toLocaleString(), color:'#0E9E6E', dot:'#10B981', bg:'#EDFAF3', bd:'#CCEFDD', sub:'มากกว่า 7 วัน'},
@@ -257,11 +298,11 @@
 
     var months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
     var tmo=((d&&d.today)||'2026-06').slice(0,7);
-    var mrows=((d&&d.monthly)||[]).filter(function(x){return x.mo>=tmo;}).slice(0,7);
+    var mrows=(__agg.monthly||[]).filter(function(x){return x.mo>=tmo;}).slice(0,7);
     var maxC=Math.max.apply(null,[1].concat(mrows.map(function(x){return x.count;})));
     var bars=mrows.map(function(x,i){ var mi=parseInt(x.mo.slice(5,7),10)-1; return {label:months[mi], yr:x.mo.slice(2,4), count:x.count, amount:compact(x.amount), hPct:Math.max(5,Math.round(x.count/maxC*100))+'%', fill:(i===0?accent:hexA(accent,0.42))}; });
 
-    var tsAll=((d&&d.suppliers)||[]).filter(function(s){return s.open>0;}).slice().sort(function(a,b){return b.amount-a.amount;}).slice(0,6);
+    var tsAll=(__agg.suppliers||[]).filter(function(s){return s.open>0;}).slice().sort(function(a,b){return b.amount-a.amount;}).slice(0,6);
     var maxA=Math.max.apply(null,[1].concat(tsAll.map(function(s){return s.amount;})));
     var topSup=tsAll.map(function(s){ return {name:vshort(s.name), open:s.open, ov:s.ov, amount:compact(s.amount), w:Math.max(5,Math.round(s.amount/maxA*100))+'%', fill:(s.ov>0?'#F43F5E':accent)}; });
 
@@ -290,9 +331,9 @@
     var chipDefs=[['all','ทั้งหมด'],['ov','เกินกำหนด'],['du','ถึงกำหนด'],['ne','ใกล้กำหนด'],['ok','ยังมีเวลา'],['dn','รับแล้ว']];
     var chips=chipDefs.map(function(cd){ var key=cd[0],label=cd[1]; var active=state.status===key; var M= key==='all'? {color:accent,bg:accentSoft,dot:accent} : meta(key); var cnt=scnt[key]||0; return {key:key,label:label,count:cnt.toLocaleString(), dot:M.dot, fg:(active?'#fff':M.color), bg:(active?M.color:M.bg), bd:(active?M.color:'transparent')}; });
 
-    var deptOpts=((d&&d.depts)||[]).map(function(x){return {value:x.dept,label:x.dept};});
+    var deptOpts=(__agg.depts||[]).map(function(x){return {value:x.dept,label:x.dept};});
 
-    var supplierRows=((d&&d.suppliers)||[]).slice(0,50).map(function(s){ return {
+    var supplierRows=(__agg.suppliers||[]).slice(0,50).map(function(s){ return {
       name:vshort(s.name), full:s.name, code:s.code, lines:s.lines, amount:money(s.amount),
       open:s.open, ov:s.ov, onTime:s.onTime, onTimeW:s.onTime+'%',
       onTimeFill:(s.onTime>=85?'#10B981':s.onTime>=60?'#EAB308':'#F43F5E'),
@@ -300,28 +341,11 @@
     }; });
 
     var selName=state.supplier;
-    var selObj=selName? ((d&&d.suppliers)||[]).find(function(s){return s.name===selName;}) : null;
+    var selObj=selName? (__agg.suppliers||[]).find(function(s){return s.name===selName;}) : null;
     var supDetailPos= selName? ((d&&d.pos)||[]).filter(function(r){return r.vendorName===selName;}).slice().sort(function(a,b){return (a.days==null?9999:a.days)-(b.days==null?9999:b.days);}).map(row) : [];
 
-    // ── ประเมิน Supplier (AVL) — คำนวณจาก pos ตรง ๆ เพราะ d.suppliers ไม่มีข้อมูล approve ──
-    var avlMap={};
-    ((d&&d.pos)||[]).forEach(function(r){
-      var key=r.vendorName||'(ไม่ระบุผู้ขาย)';
-      var s=avlMap[key]||(avlMap[key]={name:key,code:r.vendorCode||'',lines:0,amount:0,ov:0,received:0,approvedLines:0,depts:{}});
-      s.lines++; s.amount+=(+r.amount||0);
-      if(r.status==='ov') s.ov++;
-      if(r.status==='dn') s.received++;
-      if(/approv|อนุมัติ/i.test(String(r.approveAVL||''))) s.approvedLines++;
-      if(r.department) s.depts[r.department]=true;
-      if(!s.code&&r.vendorCode) s.code=r.vendorCode;
-    });
-    var approvedRaw=Object.keys(avlMap).map(function(k){ var s=avlMap[k];
-      var onTime=s.lines?Math.round(s.received/s.lines*100):0;
-      var ovRate=s.lines?(s.ov/s.lines*100):0;
-      var score=Math.max(0,Math.min(100,Math.round(onTime*0.7+(100-ovRate)*0.3)));
-      var grade=score>=85?'A':score>=70?'B':score>=50?'C':'D';
-      return {name:s.name, code:s.code, lines:s.lines, amount:Math.round(s.amount), ov:s.ov, received:s.received, onTime:onTime, approved:s.approvedLines>0, score:score, grade:grade, depts:Object.keys(s.depts)};
-    }).filter(function(s){return s.approved;}).sort(function(a,b){return b.score-a.score || b.amount-a.amount;});
+    // ── ประเมิน Supplier (AVL) — ใช้ผลรวมระดับ PO จาก __agg (นับ PO เลขไม่ซ้ำ) ──
+    var approvedRaw=(__agg.suppliers||[]).filter(function(s){return s.approved;}).slice().sort(function(a,b){return b.score-a.score || b.amount-a.amount;});
     var evalCount=approvedRaw.length;
     var evalAvgScore= evalCount? Math.round(approvedRaw.reduce(function(a,s){return a+(s.score||0);},0)/evalCount) : 0;
     var evalAvgOnTime= evalCount? Math.round(approvedRaw.reduce(function(a,s){return a+(s.onTime||0);},0)/evalCount) : 0;
@@ -341,9 +365,10 @@
       bars:bars, topSup:topSup, overdueList:overdueList,
       chips:chips, deptOpts:deptOpts, pageRows:pageRows, countText:countText, pageInfo:pageInfo, pagItems:pagItems,
       pages:pages, page:page,
-      supplierRows:supplierRows, supplierCount:((d&&d.suppliers)||[]).length,
+      supplierRows:supplierRows, supplierCount:(__agg.totalSuppliers||0),
       selName:selName, selObj:selObj, supDetailPos:supDetailPos,
       evalRows:evalRows, evalCount:evalCount, evalAvgScore:evalAvgScore, evalAvgOnTime:evalAvgOnTime, gradeDist:gradeDist,
+      overdueVal:__agg.overdueVal,
       mo:moRaw, mM:mM, dayDesc:dayDesc
     };
   }
@@ -367,7 +392,7 @@
     if((kc.ov||0)>0){
       h+='<div class="hov-banner" data-act="overdue" style="display:flex;align-items:center;gap:16px;background:linear-gradient(100deg,#FFF1F2,#FFF6F1);border:1px solid #FBD9DC;border-radius:16px;padding:16px 20px;margin-bottom:20px;cursor:pointer">'
         +'<div style="width:46px;height:46px;min-width:46px;border-radius:13px;background:#FFE0E3;display:flex;align-items:center;justify-content:center;animation:kstpulse 2.4s ease-in-out infinite"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E5364B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.8 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.8a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>'
-        +'<div style="flex:1"><div style="font-size:15px;font-weight:700;color:#B91C36">ของส่งเกินกำหนด '+(kc.ov||0).toLocaleString()+' รายการ ต้องติดตามด่วน</div><div style="font-size:12.5px;color:#A65560;margin-top:2px">มูลค่ารวม '+compact((D&&D.overdueVal)||0)+' บาท ที่ยังไม่ได้รับของแม้เลยกำหนดส่งแล้ว — คลิกเพื่อดูทั้งหมด</div></div>'
+        +'<div style="flex:1"><div style="font-size:15px;font-weight:700;color:#B91C36">ของส่งเกินกำหนด '+(kc.ov||0).toLocaleString()+' รายการ ต้องติดตามด่วน</div><div style="font-size:12.5px;color:#A65560;margin-top:2px">มูลค่ารวม '+compact(v.overdueVal||0)+' บาท ที่ยังไม่ได้รับของแม้เลยกำหนดส่งแล้ว — คลิกเพื่อดูทั้งหมด</div></div>'
         +'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E5364B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>';
     }
 
