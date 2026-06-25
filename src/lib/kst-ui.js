@@ -20,6 +20,13 @@ export function mountKstApp(root, opts) {
     ca: { label: "ยกเลิก", color: "#7E8497", bg: "#F1F2F6", dot: "#A0A6B6" },
   };
   function meta(s) { return SM[s] || SM.ca; }
+  var GM = {
+    A: { label: "ดีเยี่ยม", color: "#0E9E6E", bg: "#E7F9F1" },
+    B: { label: "ดี", color: "#3A6FF0", bg: "#EBF1FE" },
+    C: { label: "พอใช้", color: "#DA6B16", bg: "#FFF3E6" },
+    D: { label: "ต้องปรับปรุง", color: "#E5364B", bg: "#FFF0F2" },
+  };
+  function gMeta(g) { return GM[g] || GM.D; }
   function hexA(h, a) { h = (h || "#5B5BF5").replace("#", ""); if (h.length === 3) h = h.split("").map(function (x) { return x + x; }).join(""); var n = parseInt(h, 16); return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")"; }
   function money(n) { return Number(n || 0).toLocaleString("en-US", { maximumFractionDigits: 0 }); }
   function compact(n) { n = Number(n || 0); var a = Math.abs(n); if (a >= 1e6) return (n / 1e6).toLocaleString("en-US", { maximumFractionDigits: 2 }) + " ล้าน"; if (a >= 1e3) return Math.round(n / 1e3).toLocaleString("en-US") + "K"; return n.toLocaleString("en-US"); }
@@ -139,10 +146,19 @@ export function mountKstApp(root, opts) {
     var selName = state.supplier;
     var selObj = selName ? ((d && d.suppliers) || []).find(function (s) { return s.name === selName; }) : null;
     var supDetailPos = selName ? ((d && d.pos) || []).filter(function (r) { return r.vendorName === selName; }).slice().sort(function (a, b) { return (a.days == null ? 9999 : a.days) - (b.days == null ? 9999 : b.days); }).map(row) : [];
+    var approvedRaw = (d && d.approvedSuppliers) || [];
+    var evalCount = approvedRaw.length;
+    var evalAvgScore = evalCount ? Math.round(approvedRaw.reduce(function (a, s) { return a + (s.score || 0); }, 0) / evalCount) : 0;
+    var evalAvgOnTime = evalCount ? Math.round(approvedRaw.reduce(function (a, s) { return a + (s.onTime || 0); }, 0) / evalCount) : 0;
+    var gradeDist = { A: 0, B: 0, C: 0, D: 0 };
+    approvedRaw.forEach(function (s) { if (gradeDist[s.grade] !== undefined) gradeDist[s.grade]++; });
+    var evalRows = approvedRaw.map(function (s, i) {
+      return { rank: i + 1, name: vshort(s.name), full: s.name, code: s.code, depts: (s.depts || []).slice(0, 2).join(", "), lines: s.lines, amount: money(s.amount), open: s.open, ov: s.ov, onTime: s.onTime, onTimeW: s.onTime + "%", onTimeFill: s.onTime >= 85 ? "#10B981" : s.onTime >= 60 ? "#EAB308" : "#F43F5E", score: s.score, grade: s.grade, gColor: gMeta(s.grade).color, gBg: gMeta(s.grade).bg, ovColor: s.ov > 0 ? "#E5364B" : "#A0A6B6" };
+    });
     var moRaw = state.modal != null ? ((d && d.pos) || []).find(function (r) { return r.id === state.modal; }) : null;
     var mM = moRaw ? meta(moRaw.status) : SM.ca;
     var dayDesc = moRaw ? (moRaw.days == null ? "—" : moRaw.days < 0 ? "เกินกำหนดมาแล้ว " + Math.abs(moRaw.days) + " วัน" : moRaw.days === 0 ? "วันนี้เป็นวันครบกำหนด" : "เหลืออีก " + moRaw.days + " วัน") : "";
-    return { accent: accent, accentSoft: accentSoft, accentGlow: accentGlow, rowPad: COMPACT_ROWS ? "7px" : "11px", screen: screen, kc: kc, todayFmt: todayFmt, openCount: openCount, kpis: kdef, donutGrad: donutGrad, donutSegs: donutSegs, openTotal: openTotal, bars: bars, topSup: topSup, overdueList: overdueList, chips: chips, deptOpts: deptOpts, pageRows: pageRows, countText: countText, pageInfo: pageInfo, pagItems: pagItems, pages: pages, page: page, supplierRows: supplierRows, supplierCount: ((d && d.suppliers) || []).length, selName: selName, selObj: selObj, supDetailPos: supDetailPos, mo: moRaw, mM: mM, dayDesc: dayDesc };
+    return { accent: accent, accentSoft: accentSoft, accentGlow: accentGlow, rowPad: COMPACT_ROWS ? "7px" : "11px", screen: screen, kc: kc, todayFmt: todayFmt, openCount: openCount, kpis: kdef, donutGrad: donutGrad, donutSegs: donutSegs, openTotal: openTotal, bars: bars, topSup: topSup, overdueList: overdueList, chips: chips, deptOpts: deptOpts, pageRows: pageRows, countText: countText, pageInfo: pageInfo, pagItems: pagItems, pages: pages, page: page, supplierRows: supplierRows, supplierCount: ((d && d.suppliers) || []).length, selName: selName, selObj: selObj, supDetailPos: supDetailPos, evalRows: evalRows, evalCount: evalCount, evalAvgScore: evalAvgScore, evalAvgOnTime: evalAvgOnTime, gradeDist: gradeDist, mo: moRaw, mM: mM, dayDesc: dayDesc };
   }
 
   // ---- view fragments (identical markup to phase-1) ----
@@ -217,6 +233,33 @@ export function mountKstApp(root, opts) {
     return h;
   }
 
+  function evaluation(v) {
+    var h = '<div style="padding:24px 32px 40px">';
+    h += '<div style="margin-bottom:18px"><div style="font-size:22px;font-weight:700;font-family:Sora,\'Noto Sans Thai\',sans-serif;letter-spacing:-.4px">ประเมิน Supplier (AVL)</div><div style="font-size:13px;color:#6B7186;margin-top:2px">สรุปรายชื่อ Supplier ที่ผ่านการอนุมัติ (Approved Vendor List) พร้อมคะแนนประเมินผลการส่งมอบ — เรียงตามคะแนนสูงสุด</div></div>';
+    if (!v.evalCount) {
+      h += '<div style="background:#fff;border:1px solid #ECEDF4;border-radius:16px;padding:48px;text-align:center;color:#8A90A2;font-size:14px">ยังไม่มี Supplier ที่ผ่านการอนุมัติ (Approved) ในข้อมูลปัจจุบัน</div></div>';
+      return h;
+    }
+    var cards = [
+      { label: "Supplier ที่อนุมัติแล้ว", value: v.evalCount.toLocaleString(), sub: "อยู่ใน Approved Vendor List", color: "#171A2B", bg: "#FFFFFF", bd: "#ECEDF4", dot: v.accent },
+      { label: "คะแนนประเมินเฉลี่ย", value: v.evalAvgScore + "", sub: "เต็ม 100 คะแนน", color: "#5B5BF5", bg: "#F1F1FE", bd: "#DDDDFB", dot: "#5B5BF5" },
+      { label: "อัตรารับของครบเฉลี่ย", value: v.evalAvgOnTime + "%", sub: "ค่าเฉลี่ยทุก Supplier ที่อนุมัติ", color: "#0E9E6E", bg: "#EDFAF3", bd: "#CCEFDD", dot: "#10B981" },
+      { label: "เกรด A (ดีเยี่ยม)", value: (v.gradeDist.A || 0).toLocaleString(), sub: "B " + (v.gradeDist.B || 0) + " · C " + (v.gradeDist.C || 0) + " · D " + (v.gradeDist.D || 0), color: "#0E9E6E", bg: "#E7F9F1", bd: "#CCEFDD", dot: "#10B981" },
+    ];
+    h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px">';
+    cards.forEach(function (k) { h += '<div style="background:' + k.bg + ";border:1px solid " + k.bd + ';border-radius:16px;padding:16px 16px 15px;box-shadow:0 1px 2px rgba(16,24,40,.04)"><div style="display:flex;align-items:center;gap:7px;margin-bottom:10px"><span style="width:9px;height:9px;border-radius:50%;background:' + k.dot + '"></span><span style="font-size:11px;font-weight:700;color:#5A6175;letter-spacing:.2px">' + k.label + '</span></div><div style="font-family:Sora,sans-serif;font-weight:700;font-size:30px;line-height:1;color:' + k.color + ';letter-spacing:-1px">' + k.value + '</div><div style="font-size:11px;color:#8A90A2;margin-top:7px;line-height:1.35">' + k.sub + "</div></div>"; });
+    h += "</div>";
+    function th(label, ex) { ex = ex || {}; return '<th style="text-align:' + (ex.align || "left") + ";padding:13px " + (ex.px || "14") + "px;font-weight:600;color:#6B7186;font-size:11.5px;white-space:nowrap;border-bottom:1px solid #ECEDF4" + (ex.w ? ";width:" + ex.w : "") + '">' + label + "</th>"; }
+    h += '<div style="background:#fff;border:1px solid #ECEDF4;border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.03)"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#FAFBFD">' + th("#", { align: "center", px: "14" }) + th("Supplier", { px: "20" }) + th("แผนก/ฝ่าย") + th("รายการ", { align: "center" }) + th("มูลค่ารวม (฿)", { align: "right" }) + th("เกินกำหนด", { align: "center" }) + th("อัตรารับของครบ", { w: "150px" }) + th("คะแนน", { align: "center" }) + th("เกรด", { align: "center", px: "20" }) + "</tr></thead><tbody>";
+    v.evalRows.forEach(function (s) {
+      h += '<tr class="hov-row" data-act="evalsel" data-arg="' + esc(s.full) + '" style="border-bottom:1px solid #F2F3F8;cursor:pointer"><td style="padding:12px 14px;text-align:center;font-family:\'DM Mono\',monospace;color:#A0A6B6;font-size:12px">' + s.rank + '</td><td style="padding:12px 20px"><div style="font-weight:600;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + esc(s.full) + '">' + esc(s.name) + '</div><div style="font-size:10.5px;color:#A0A6B6;font-family:\'DM Mono\',monospace">' + esc(s.code) + '</div></td><td style="padding:12px 14px;font-size:11.5px;color:#5A6175;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(s.depts || "—") + '</td><td style="padding:12px 14px;text-align:center;font-family:\'DM Mono\',monospace;color:#5A6175">' + s.lines + '</td><td style="padding:12px 14px;text-align:right;font-family:\'DM Mono\',monospace;font-size:12.5px;font-weight:500">' + s.amount + '</td><td style="padding:12px 14px;text-align:center"><span style="font-family:\'DM Mono\',monospace;font-weight:500;color:' + s.ovColor + '">' + s.ov + '</span></td><td style="padding:12px 14px"><div style="display:flex;align-items:center;gap:9px"><div style="flex:1;height:7px;border-radius:5px;background:#F1F2F8;overflow:hidden"><div style="height:100%;border-radius:5px;width:' + s.onTimeW + ";background:" + s.onTimeFill + '"></div></div><span style="font-family:\'DM Mono\',monospace;font-size:11.5px;color:#5A6175;width:34px;text-align:right">' + s.onTime + '%</span></div></td><td style="padding:12px 14px;text-align:center;font-family:Sora,sans-serif;font-weight:700;font-size:15px;color:' + s.gColor + '">' + s.score + '</td><td style="padding:12px 20px;text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;padding:3px 9px;border-radius:8px;font-family:Sora,sans-serif;font-weight:700;font-size:13px;background:' + s.gBg + ";color:" + s.gColor + '">' + s.grade + "</span></td></tr>";
+    });
+    h += "</tbody></table></div>";
+    h += '<div style="font-size:11px;color:#A0A6B6;margin-top:12px;line-height:1.5">เกณฑ์คะแนน = อัตรารับของครบ ×70% + (100 − อัตราเกินกำหนด) ×30% &nbsp;·&nbsp; เกรด A ≥ 85 · B ≥ 70 · C ≥ 50 · D &lt; 50 &nbsp;·&nbsp; คลิกแถวเพื่อดูรายละเอียด PO ของ Supplier</div>';
+    h += "</div>";
+    return h;
+  }
+
   function modalView(v) {
     var mo = v.mo; if (!mo) return "";
     var mM = v.mM, f = fdate;
@@ -241,8 +284,9 @@ export function mountKstApp(root, opts) {
       navItem("dashboard", '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg> ภาพรวม', "", v) +
       navItem("pos", '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.5" y2="6"/><line x1="3" y1="12" x2="3.5" y2="12"/><line x1="3" y1="18" x2="3.5" y2="18"/></svg> รายการ PO', openCountBadge, v) +
       navItem("suppliers", '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h13v10H3z"/><path d="M16 10h3.5L22 13v4h-6"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg> Supplier', "", v) +
+      navItem("evaluation", '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> ประเมิน Supplier', "", v) +
       '<div style="margin-top:auto;padding:14px;border-radius:13px;background:#F6F7FC;border:1px solid #EDEEF6"><div style="font-size:10px;color:#9AA0B4;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">ข้อมูล ณ วันที่</div><div style="font-size:13px;font-weight:600;color:#3A4055">' + v.todayFmt + '</div><div style="font-size:11px;color:#9AA0B4;margin-top:2px;font-family:\'DM Mono\',monospace">snapshot</div></div></aside>';
-    var main = '<main style="flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column">' + (state.screen === "dashboard" ? dashboard(v) : "") + (state.screen === "pos" ? poList(v) : "") + (state.screen === "suppliers" ? suppliers(v) : "") + "</main>";
+    var main = '<main style="flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column">' + (state.screen === "dashboard" ? dashboard(v) : "") + (state.screen === "pos" ? poList(v) : "") + (state.screen === "suppliers" ? suppliers(v) : "") + (state.screen === "evaluation" ? evaluation(v) : "") + "</main>";
     var toast = state.toast ? '<div style="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:#171A2B;color:#fff;padding:13px 20px;border-radius:12px;font-size:13px;box-shadow:0 12px 32px rgba(0,0,0,.25);z-index:300;display:flex;align-items:center;gap:10px;max-width:80vw"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9CFFC9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>' + esc(state.toast) + "</div>" : "";
     var html = '<div style="display:flex;height:100vh;width:100%;overflow:hidden">' + aside + main + "</div>" + toast + modalView(v);
     var act = document.activeElement, focusSearch = act && act.id === "kst-search", caret = focusSearch ? act.selectionStart : 0;
@@ -262,6 +306,7 @@ export function mountKstApp(root, opts) {
       case "closeModal": setState({ modal: null }); break;
       case "stop": e.stopPropagation(); break;
       case "supsel": setState({ supplier: arg }); break;
+      case "evalsel": setState({ screen: "suppliers", supplier: arg }); break;
       case "backsup": setState({ supplier: null }); break;
       case "reset": setState({ search: "", status: "all", dept: "", from: "", to: "", page: 1 }); break;
       case "prev": setState({ page: Math.max(1, state.page - 1) }); break;
