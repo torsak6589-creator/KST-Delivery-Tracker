@@ -19,7 +19,7 @@ async function loadInitialData() {
     const seed = (await import("../../prisma/seed-data.json")).default as any;
     return buildDataset(seed.pos, seed.today || "2026-06-24");
   } catch {
-    return { today: "2026-06-24", kpi: {}, openVal: 0, overdueVal: 0, totalSuppliers: 0, pos: [], suppliers: [], depts: [], monthly: [] };
+    return { today: "2026-06-24", kpi: {}, openVal: 0, overdueVal: 0, totalSuppliers: 0, pos: [], suppliers: [], approvedSuppliers: [], depts: [], monthly: [] };
   }
 }
 

@@ -103,6 +103,7 @@ export interface Dataset {
   totalSuppliers: number;
   pos: PoRow[];
   suppliers: any[];
+  approvedSuppliers: any[];
   depts: any[];
   monthly: any[];
 }
@@ -124,7 +125,7 @@ export function buildDataset(rows: PoRow[], today: string): Dataset {
   const sMap: Record<string, any> = {};
   for (const r of pos) {
     const key = r.vendorName || "(ไม่ระบุผู้ขาย)";
-    const s = (sMap[key] ||= { name: key, code: r.vendorCode || "", lines: 0, amount: 0, open: 0, ov: 0, du: 0, ne: 0, received: 0, depts: {} as Record<string, true> });
+    const s = (sMap[key] ||= { name: key, code: r.vendorCode || "", lines: 0, amount: 0, open: 0, ov: 0, du: 0, ne: 0, received: 0, approvedLines: 0, depts: {} as Record<string, true> });
     s.lines++;
     s.amount += toNum(r.amount);
     const st = r.status as string;
@@ -133,17 +134,35 @@ export function buildDataset(rows: PoRow[], today: string): Dataset {
     if (st === "du") s.du++;
     if (st === "ne") s.ne++;
     if (st === "dn") s.received++;
+    if (/approv|อนุมัติ/i.test(String(r.approveAVL || ""))) s.approvedLines++;
     if (r.department) s.depts[r.department] = true;
     if (!s.code && r.vendorCode) s.code = r.vendorCode;
   }
   const suppliers = Object.values(sMap)
-    .map((s: any) => ({
-      name: s.name, code: s.code, lines: s.lines, amount: Math.round(s.amount),
-      open: s.open, ov: s.ov, du: s.du, ne: s.ne, received: s.received,
-      onTime: s.lines ? Math.round((s.received / s.lines) * 100) : 0,
-      depts: Object.keys(s.depts),
-    }))
+    .map((s: any) => {
+      const onTime = s.lines ? Math.round((s.received / s.lines) * 100) : 0;
+      const ovRate = s.lines ? (s.ov / s.lines) * 100 : 0;
+      // Vendor evaluation score (0–100): weighted on-time delivery, penalized by overdue rate.
+      const score = Math.max(0, Math.min(100, Math.round(onTime * 0.7 + (100 - ovRate) * 0.3)));
+      const grade = score >= 85 ? "A" : score >= 70 ? "B" : score >= 50 ? "C" : "D";
+      return {
+        name: s.name, code: s.code, lines: s.lines, amount: Math.round(s.amount),
+        open: s.open, ov: s.ov, du: s.du, ne: s.ne, received: s.received,
+        onTime,
+        approved: s.approvedLines > 0,
+        approvedLines: s.approvedLines,
+        score, grade,
+        depts: Object.keys(s.depts),
+      };
+    })
     .sort((a, b) => b.amount - a.amount);
+
+  // Approved Vendor List (AVL) — suppliers with at least one approved PO line,
+  // ranked by evaluation score for the supplier-assessment screen.
+  const approvedSuppliers = suppliers
+    .filter((s) => s.approved)
+    .slice()
+    .sort((a, b) => b.score - a.score || b.amount - a.amount);
 
   const dMap: Record<string, any> = {};
   for (const r of pos) {
@@ -180,6 +199,7 @@ export function buildDataset(rows: PoRow[], today: string): Dataset {
     totalSuppliers: suppliers.length,
     pos,
     suppliers,
+    approvedSuppliers,
     depts,
     monthly,
   };
